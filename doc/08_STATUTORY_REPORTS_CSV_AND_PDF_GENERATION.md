@@ -50,9 +50,13 @@ Themis Mobile generates two primary statutory artifacts immediately upon complet
 
 ### 2.2 Visual Artifact Preview
 
-![Official Statutory Notice PDF Document](../assets/UI/13_statutory_notice_pdf_document.png)
+<div align="center">
 
-*Figure 8.1: High-resolution rendering of the official Directorate of Legal Metrology Statutory Notice of Non-Compliance compiled directly on-device.*
+<img src="../assets/UI/13_statutory_notice_pdf_document.png" width="360" alt="Official Statutory Notice PDF Document" />
+
+<p><em>Figure 8.1: High-resolution rendering of the official Directorate of Legal Metrology Statutory Notice of Non-Compliance compiled directly on-device.</em></p>
+
+</div>
 
 ### 2.3 Legal Framework & Document Sections
 

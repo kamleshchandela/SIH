@@ -60,7 +60,7 @@ The Dashboard is the operational home screen. It gives the officer an instant sn
 ### 🖼️ Visual Interface:
 | 1. Officer In Charge & AI Engine Core | 2. Live Statutory Compliance Metrics |
 |:---:|:---:|
-| ![Officer & Engine Telemetry](../assets/UI/01_dashboard_live_engine_status.png) | ![Compliance Metrics](../assets/UI/02_dashboard_compliance_metrics.png) |
+| <img src="../assets/UI/01_dashboard_live_engine_status.png" width="250" alt="Officer & Engine Telemetry" /> | <img src="../assets/UI/02_dashboard_compliance_metrics.png" width="250" alt="Compliance Metrics" /> |
 | *Top Bar: Logged-in officer status, live ONNX AI inference pipeline status, and statutory acts enforced.* | *Bottom Section: Total audits conducted, pass rate, and total Jan Vishwas compounding penalties.* |
 
 ### 🔍 Step-by-Step UI Breakdown:
@@ -97,7 +97,7 @@ This is the primary tool used during field inspections. Officers can take photos
 ### 🖼️ Visual Interface (3 Scanning Modes):
 | Mode 1: Single Panel Scan | Mode 2: Multi-Panel Pooled SKU | Mode 3: Server Path Audit |
 |:---:|:---:|:---:|
-| ![Single Panel Scan](../assets/UI/03_scan_single_panel_mode.png) | ![Multi Panel Pooled Scan](../assets/UI/04_scan_multi_panel_pooled_sku.png) | ![Server Path Scan](../assets/UI/05_scan_server_filesystem_path.png) |
+| <img src="../assets/UI/03_scan_single_panel_mode.png" width="250" alt="Single Panel Scan" /> | <img src="../assets/UI/04_scan_multi_panel_pooled_sku.png" width="250" alt="Multi Panel Pooled Scan" /> | <img src="../assets/UI/05_scan_server_filesystem_path.png" width="250" alt="Server Path Scan" /> |
 | *Fast single-photo capture for spot checks.* | *Pools Front, Back, Nutritional, and Barcode sides.* | *Direct audit of server-hosted image folders.* |
 
 ### 🔍 How Each Mode Works:
@@ -138,7 +138,7 @@ Enables officers to search, browse, and review past field inspections stored in 
 ### 🖼️ Visual Interface:
 <div align="center">
 
-![Historical Inspection Repository](../assets/UI/06_inspection_repository_history.png)
+<img src="../assets/UI/06_inspection_repository_history.png" width="260" alt="Historical Inspection Repository" />
 
 </div>
 
@@ -188,11 +188,11 @@ This is the core evaluation screen. It translates complex OCR bounding boxes and
 ### 🖼️ Visual Interface:
 | 1. Header & Compliance Score | 2. Rule Findings with Warnings | 3. Evaluated Declarations Tabs |
 |:---:|:---:|:---:|
-| ![Audit Header](../assets/UI/07_inspection_report_summary_evidence.png) | ![Rule Warnings](../assets/UI/08_inspection_rule_evaluations_warning.png) | ![Rule Filter](../assets/UI/09_inspection_rule_evaluations_filter.png) |
+| <img src="../assets/UI/07_inspection_report_summary_evidence.png" width="250" alt="Audit Header" /> | <img src="../assets/UI/08_inspection_rule_evaluations_warning.png" width="250" alt="Rule Warnings" /> | <img src="../assets/UI/09_inspection_rule_evaluations_filter.png" width="250" alt="Rule Filter" /> |
 
 | 4. Jan Vishwas Penalties | 5. OCR Bounding Boxes | 6. Confidence Score List |
 |:---:|:---:|:---:|
-| ![Penalties Card](../assets/UI/10_statutory_penalties_compounding.png) | ![OCR Bounding Boxes](../assets/UI/11_extracted_ocr_bounding_boxes.png) | ![OCR Tokens](../assets/UI/12_extracted_ocr_confidence_tokens.png) |
+| <img src="../assets/UI/10_statutory_penalties_compounding.png" width="250" alt="Penalties Card" /> | <img src="../assets/UI/11_extracted_ocr_bounding_boxes.png" width="250" alt="OCR Bounding Boxes" /> | <img src="../assets/UI/12_extracted_ocr_confidence_tokens.png" width="250" alt="OCR Tokens" /> |
 
 ### 🔍 Detailed Section Breakdown:
 
@@ -262,9 +262,9 @@ Renders an official, print-ready Government of India Legal Metrology Show-Cause 
 ### 🖼️ Visual Interface:
 <div align="center">
 
-![Statutory Notice PDF Preview](../assets/UI/13_statutory_notice_pdf_document.png)
+<img src="../assets/UI/13_statutory_notice_pdf_document.png" width="360" alt="Statutory Notice PDF Preview" />
 
-*The complete print-ready PDF generated directly on-device.*
+<p><em>The complete print-ready PDF generated directly on-device.</em></p>
 
 </div>
 

@@ -150,7 +150,7 @@ The command center for enforcement officers, showing live backend connectivity, 
 
 | Live Engine & Officer Telemetry | Statutory Compliance Metrics |
 |:---:|:---:|
-| ![Live Engine Telemetry](assets/UI/01_dashboard_live_engine_status.png) | ![Compliance Metrics](assets/UI/02_dashboard_compliance_metrics.png) |
+| <img src="assets/UI/01_dashboard_live_engine_status.png" width="250" alt="Live Engine Telemetry" /> | <img src="assets/UI/02_dashboard_compliance_metrics.png" width="250" alt="Compliance Metrics" /> |
 | *Active Enforcement Director session, ONNX Runtime CPU inference status, and heartbeat timestamp.* | *2x2 Metrics grid (Total Audits, Compliant SKUs, Pass Rate) and Jan Vishwas penalty liabilities.* |
 
 ---
@@ -160,7 +160,7 @@ Three flexible scanning workflows tailored for physical field enforcement or bat
 
 | 1. Single Panel Scan | 2. Full SKU Multi-Panel Pooled | 3. Server Filesystem Audit |
 |:---:|:---:|:---:|
-| ![Single Panel Scan](assets/UI/03_scan_single_panel_mode.png) | ![Multi Panel Pooled Scan](assets/UI/04_scan_multi_panel_pooled_sku.png) | ![Server Path Scan](assets/UI/05_scan_server_filesystem_path.png) |
+| <img src="assets/UI/03_scan_single_panel_mode.png" width="250" alt="Single Panel Scan" /> | <img src="assets/UI/04_scan_multi_panel_pooled_sku.png" width="250" alt="Multi Panel Pooled Scan" /> | <img src="assets/UI/05_scan_server_filesystem_path.png" width="250" alt="Server Path Scan" /> |
 | *Direct single-face upload for rapid field verification of MRP and Dates.* | *Horizontal thumbnail strip pooling Front, Back, Nutritional, and Barcode sides.* | *Direct audit of server-hosted high-resolution SKU folders and image datasets.* |
 
 ---
@@ -170,9 +170,9 @@ Searchable archive of all historical field inspections with instant risk-tier fi
 
 <div align="center">
 
-![Historical Inspection Repository](assets/UI/06_inspection_repository_history.png)
+<img src="assets/UI/06_inspection_repository_history.png" width="260" alt="Historical Inspection Repository" />
 
-*Search by SKU name, filter by risk tiers (`CriticalSevere`, `HighRiskMajor`, `LowRiskMinor`), and inspect past compounding fines.*
+<p><em>Search by SKU name, filter by risk tiers (<code>CriticalSevere</code>, <code>HighRiskMajor</code>, <code>LowRiskMinor</code>), and inspect past compounding fines.</em></p>
 
 </div>
 
@@ -183,7 +183,7 @@ Detailed visual findings rendering statutory verdicts, rule-by-rule evidence, an
 
 | 1. Audit Summary & Evidence | 2. Rule Findings with Warnings | 3. Declaration Filter Tabs |
 |:---:|:---:|:---:|
-| ![Report Summary](assets/UI/07_inspection_report_summary_evidence.png) | ![Rule Warnings](assets/UI/08_inspection_rule_evaluations_warning.png) | ![Rule Filters](assets/UI/09_inspection_rule_evaluations_filter.png) |
+| <img src="assets/UI/07_inspection_report_summary_evidence.png" width="250" alt="Report Summary" /> | <img src="assets/UI/08_inspection_rule_evaluations_warning.png" width="250" alt="Rule Warnings" /> | <img src="assets/UI/09_inspection_rule_evaluations_filter.png" width="250" alt="Rule Filters" /> |
 | *Audit ID `INSP-20260908-165510`, compliance score (71.4%), and photo evidence.* | *Clear warning flags (e.g. MRP missing explicit 'inclusive of all taxes' clause).* | *Interactive tabs filtering between All (8), Violations (0), and Pass (5).* |
 
 ---
@@ -193,7 +193,7 @@ Transparent AI explainability showing the exact raw text tokens, coordinates, an
 
 | 4. Jan Vishwas Compounding Card | 5. Extracted OCR Bounding Boxes | 6. Confidence Score List |
 |:---:|:---:|:---:|
-| ![Penalties Card](assets/UI/10_statutory_penalties_compounding.png) | ![OCR Bounding Boxes](assets/UI/11_extracted_ocr_bounding_boxes.png) | ![Confidence Scores](assets/UI/12_extracted_ocr_confidence_tokens.png) |
+| <img src="assets/UI/10_statutory_penalties_compounding.png" width="250" alt="Penalties Card" /> | <img src="assets/UI/11_extracted_ocr_bounding_boxes.png" width="250" alt="OCR Bounding Boxes" /> | <img src="assets/UI/12_extracted_ocr_confidence_tokens.png" width="250" alt="Confidence Scores" /> |
 | *Statutory compounding estimate under Section 36(1) and Section 49.* | *Extracted tokens with spatial bounding box coordinates `(y, x) h x w`.* | *Individual token confidence percentages (e.g. 98.4%, 90.3%) for full audit integrity.* |
 
 ---
@@ -207,9 +207,9 @@ Compiled via `expo-print` using standard A4 typography and issued under Section 
 
 <div align="center">
 
-![Official Statutory Notice PDF Document](assets/UI/13_statutory_notice_pdf_document.png)
+<img src="assets/UI/13_statutory_notice_pdf_document.png" width="360" alt="Official Statutory Notice PDF Document" />
 
-*Sample Generated Notice: [Download Sample PDF](assets/UI/statutory_notice_INSP-20260908-165510.pdf)*
+<p><em>Sample Generated Notice: <a href="assets/UI/statutory_notice_INSP-20260908-165510.pdf">Download Sample PDF</a></em></p>
 
 </div>
 
