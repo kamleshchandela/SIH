@@ -79,5 +79,5 @@ The mobile app automatically reads the laptop's live IP address from the Metro b
 
 | Role | Username | Password | Permissions |
 |---|---|---|---|
-| **Enforcement Director (Admin)** | `admin` | `themis2024` | All endpoints, batch audits, global analytics, legal notice issuance. |
-| **Field Inspector** | `inspector` | `inspect2024` | Field SKU scans, rule evaluations, evidence verification, CSV audit exports. |
+| **Enforcement Director (Admin)** | `admin` | `admin@themis2026` | All endpoints, batch audits, global analytics, legal notice issuance. |
+| **Field Inspector** | `inspector` | `inspector@themis2026` | Field SKU scans, rule evaluations, evidence verification, CSV audit exports. |

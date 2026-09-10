@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Themis Mobile Header](https://img.shields.io/badge/SIH%202024-Problem%20Statement%2026034-004d40?style=for-the-badge)
+![Themis Mobile Header](https://img.shields.io/badge/SIH%202026-Problem%20Statement%2026034-004d40?style=for-the-badge)
 ![Expo SDK](https://img.shields.io/badge/Expo%20SDK-54-000000?style=for-the-badge&logo=expo)
 ![React Native](https://img.shields.io/badge/React%20Native-0.81-61DAFB?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)
@@ -270,8 +270,8 @@ npx expo start
 
 | Role | Username | Password | Operational Permissions |
 |---|---|---|---|
-| **Enforcement Director (Admin)** | `admin` | `themis2024` | Full access, batch audits, global telemetry, official statutory notice issuance. |
-| **Field Inspector** | `inspector` | `inspect2024` | Field SKU scans, rule evaluations, evidence verification, CSV audit exports. |
+| **Enforcement Director (Admin)** | `admin` | `admin@themis2026` | Full access, batch audits, global telemetry, official statutory notice issuance. |
+| **Field Inspector** | `inspector` | `inspector@themis2026` | Field SKU scans, rule evaluations, evidence verification, CSV audit exports. |
 
 ---
 
@@ -350,6 +350,6 @@ For deep-dive technical evaluations, architectural decisions, and regulatory spe
 <div align="center">
 
 **Directorate of Legal Metrology • Government of India**  
-*Themis Mobile Client — Smart India Hackathon 2024*
+*Themis Mobile Client — Smart India Hackathon 2026*
 
 </div>

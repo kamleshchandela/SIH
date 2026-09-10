@@ -37,7 +37,7 @@ The frontend client communicates with the Themis Rust backend over 12 RESTful en
 - **Headers:** `Content-Type: application/json`
 - **Request Body:**
   ```json
-  { "username": "admin", "password": "themis2024" }
+  { "username": "admin", "password": "admin@themis2026" }
   ```
 - **Response (HTTP 200):**
   ```json
