@@ -1,0 +1,46 @@
+# Rust build artifacts
+target/
+themis/target/
+*.so
+themis_app/android/app/src/main/jniLibs/**/*.so
+
+# Large ONNX binary models (>100MB exceeds GitHub limits)
+themis/models/ppocr_det_server.onnx
+themis/models/candidates/
+
+# Internal scratch & problem exploration notes
+neo/
+
+# Raw uncurated datasets and portal downloads
+dataset/pd/
+dataset/1(i)_*.pdf
+batch_scan_results.json
+dataset/batch_scan_results.json
+
+# Keep only exemplary sample products in repository; ignore other raw downloads
+dataset/real_products/*
+!dataset/real_products/8901262010320_Amul_Butter
+!dataset/real_products/8901262200196_Amul_Masti_Spiced_Buttermilk_200ml
+
+# Temporary files and logs
+*.log
+tmp/
+scratch/
+evidence/
+themis/evidence/
+data/
+.tempmediaStorage/
+.DS_Store
+image.png
+
+# Flutter build artifacts and caches
+themis_app/build/
+themis_app/.dart_tool/
+themis_app/.flutter-plugins
+themis_app/.flutter-plugins-dependencies
+themis_app/.pub/
+themis_app/.pub-cache/
+themis_app/linux/flutter/ephemeral/
+
+# Release APKs ship via GitHub Releases, never in git
+*.apk

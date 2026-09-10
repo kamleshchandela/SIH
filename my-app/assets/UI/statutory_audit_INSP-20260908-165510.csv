@@ -1,0 +1,15 @@
+Inspection ID,Timestamp,Product SKU,Field,Status,Source Panel,Matched Value,Remarks
+"INSP-20260908-165510","2026-09-08T16:55:10.802432900+00:00","N/A","ManufacturerDetails","Compliant","1000091598.jpg","N/A","Complies with Rule 6(1)(a): Complete address and postal PIN code identified."
+"INSP-20260908-165510","2026-09-08T16:55:10.802432900+00:00","N/A","NetQuantity","Compliant","1000091598.jpg","N/A","Compliant: Net quantity declared as 460 g using standard metric symbol."
+"INSP-20260908-165510","2026-09-08T16:55:10.802432900+00:00","N/A","MaximumRetailPrice","Warning","1000091598.jpg","N/A","WARNING: Price detected but 'inclusive of all taxes' clause was not explicitly confirmed."
+"INSP-20260908-165510","2026-09-08T16:55:10.802432900+00:00","N/A","ManufactureDate","Compliant","1000091598.jpg","N/A","Complies with Rule 6(1)(d): Packing date found as 15JUN 2027."
+"INSP-20260908-165510","2026-09-08T16:55:10.802432900+00:00","N/A","CountryOfOrigin","Compliant","1000091598.jpg","N/A","Complies with Rule 6(1)(da): Domestic origin established via verified Indian manufacturing premises & postal PIN."
+"INSP-20260908-165510","2026-09-08T16:55:10.802432900+00:00","N/A","ConsumerCare","Warning","1000091598.jpg","N/A","Rule 6(1)(g) mandates both telephone number and email address for consumer grievances."
+"INSP-20260908-165510","2026-09-08T16:55:10.802432900+00:00","N/A","UnitSalePrice","NotApplicable","N/A","N/A","Exempt from Rule 6(1)(f): Unit sale price not mandatory for pack sizes below 1kg / 1L."
+"INSP-20260908-165510","2026-09-08T16:55:10.802432900+00:00","N/A","Rule7NumeralHeight","Compliant","1000091598.jpg","N/A","Complies with Rule 7 & Schedule II: Numeral and letter height conforms to statutory visibility thresholds."
+
+--- STATUTORY AUDIT SUMMARY ---
+Overall Compliance,"STATUTORY VIOLATION (FAIL)"
+Statutory Risk Tier,"LowRiskMinor"
+Compliance Score,"71.4%"
+Total Jan Vishwas Compounding Fine,"INR 0"

@@ -1,0 +1,49 @@
+[package]
+name = "themis"
+version = "0.1.0"
+edition = "2024"
+description = "Themis — Legal Metrology Compliance Engine & Automated Inspector"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+anyhow = "1"
+thiserror = "2"
+chrono = { version = "0.4", features = ["serde"] }
+regex = "1"
+clap = { version = "4", features = ["derive"] }
+
+# Web Framework
+axum = { version = "0.8", features = ["multipart"] }
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+
+# Authentication & Crypto
+sha2 = "0.10"
+hmac = "0.12"
+base64 = "0.22"
+
+# AI Inference (CPU-only ONNX Runtime)
+ort = { version = "2.0.0-rc.13", features = ["ndarray"] }
+ndarray = "0.17"
+image = "0.25"
+
+# Database Persistence (PostgreSQL)
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "tls-rustls", "postgres", "chrono", "json", "macros"] }
+
+[lib]
+name = "themis"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "themis"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
