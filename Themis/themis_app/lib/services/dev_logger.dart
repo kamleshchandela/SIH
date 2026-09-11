@@ -221,11 +221,11 @@ class DevLogger {
 
   String exportAll() {
     if (entriesNotifier.value.isEmpty) {
-      return '// Themis Inspection Diagnostic Log\n// Empty session log.';
+      return '// PARAKH Inspection Diagnostic Log\n// Empty session log.';
     }
     final buffer = StringBuffer();
     buffer.writeln('================================================================');
-    buffer.writeln('THEMIS LEGAL METROLOGY INSPECTOR // DIAGNOSTIC AUDIT LOGS');
+    buffer.writeln('PARAKH LEGAL METROLOGY INSPECTOR // DIAGNOSTIC AUDIT LOGS');
     buffer.writeln('Generated: ${DateTime.now().toUtc().toIso8601String()}');
     buffer.writeln('Active entries: ${entriesNotifier.value.length}');
     buffer.writeln('================================================================\n');

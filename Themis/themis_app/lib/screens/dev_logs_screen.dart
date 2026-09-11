@@ -135,7 +135,7 @@ class _DevLogsScreenState extends State<DevLogsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
             Text(
-              'THEMIS // DIAGNOSTIC TELEMETRY',
+              'PARAKH // DIAGNOSTIC TELEMETRY',
               style: TextStyle(
                 color: GlassTheme.textMuted,
                 fontSize: 9,

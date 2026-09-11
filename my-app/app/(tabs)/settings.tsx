@@ -197,7 +197,7 @@ function GlassyAnimatedBackground() {
         ]}
       />
 
-      {/* Themis AI Scanning Beam */}
+      {/* PARAKH AI Scanning Beam */}
       <Animated.View
         style={[
           styles.scannerBeam,
@@ -297,7 +297,7 @@ export default function SettingsScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Backend Server Configuration</Text>
           <Text style={styles.cardSub}>
-            Configure the REST API endpoint of your local or remote Themis engine.
+            Configure the REST API endpoint of your local or remote PARAKH engine.
           </Text>
 
           <View style={styles.inputGroup}>
@@ -397,7 +397,7 @@ export default function SettingsScreen() {
         </TouchableOpacity>
 
         <Text style={styles.versionFooter}>
-          Themis Client v1.0.0 • Mobile Legal Metrology Unit
+          PARAKH Client v1.0.0 • Mobile Legal Metrology Unit
         </Text>
       </ScrollView>
     </View>

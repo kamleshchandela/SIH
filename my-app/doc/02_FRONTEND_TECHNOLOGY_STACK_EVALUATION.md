@@ -1,6 +1,6 @@
 # 02 — Frontend Technology Stack Evaluation
 
-> **A technical comparative evaluation of cross-platform mobile frameworks, detailing why React Native (v0.81), Expo SDK 54, and Expo Router v6 were chosen for Themis Mobile.**
+> **A technical comparative evaluation of cross-platform mobile frameworks, detailing why React Native (v0.81), Expo SDK 54, and Expo Router v6 were chosen for PARAKH Mobile.**
 
 ---
 
@@ -29,7 +29,7 @@ To build a high-performance field enforcement tool for Indian Metrology Officers
 ## 2. Why React Native + Expo SDK 54 Won
 
 ### 1. Unified TypeScript Ecosystem with Rust Backend
-- Themis backend is written in Rust, utilizing strongly typed structs (`ComplianceReport`, `RuleEvaluation`, `StatutoryPenalty`, `InspectionStats`).
+- PARAKH backend is written in Rust, utilizing strongly typed structs (`ComplianceReport`, `RuleEvaluation`, `StatutoryPenalty`, `InspectionStats`).
 - By utilizing TypeScript 5.9 on the frontend, we created a 1:1 typed contract mirror in `src/types/themis.ts`. Any payload mismatches are caught during compile time (`npx tsc --noEmit`) before reaching officer devices.
 
 ### 2. File-Based Routing (Expo Router v6)

@@ -52,7 +52,7 @@ Build (custom painter, ~100 lines, half a day to pixel-match):
   `CircularNotchedRectangle` + centered `FloatingActionButton` — Flutter ships
   this exact pattern; only the rounded top corners need the custom painter.
 
-Themis mapping: icons become Home / Inspect / (scan FAB) / Reports / Engine.
+PARAKH mapping: icons become Home / Inspect / (scan FAB) / Reports / Engine.
 Active tab = white filled icon, rest dim `#6B7280`.
 
 ### 2b. Timeline pin bubbles ("flight card bubbles")
@@ -72,7 +72,7 @@ Build (no painter math beyond a dashed line, half a day):
   blue = net-quantity, purple = font/packaging — the exact severity palette the
   checklist already uses.
 
-Themis mapping: Trip Plan days → inspection clauses; `Flight 8:30 am` row →
+PARAKH mapping: Trip Plan days → inspection clauses; `Flight 8:30 am` row →
 `MRP Violation · ₹48,000`; `From/To` sub-rows → rule citation + measured value.
 
 ### 2c. Everything else on those screens is layout, not widgets

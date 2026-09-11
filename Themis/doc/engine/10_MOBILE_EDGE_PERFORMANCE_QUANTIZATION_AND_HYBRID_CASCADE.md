@@ -1,7 +1,7 @@
 # 10 — Mobile Edge Performance, INT8 Quantization & Hybrid Cascade Architecture
 
 > **Status:** Target Architecture & Edge Roadmap (Benchmarked & Validated; Hybrid Mobile Runtime In Progress)  
-> **Engineering specification, empirical benchmarks, and deployment guide for running the Themis Legal Metrology compliance engine on mobile devices, offline edge environments, and cloud hybrid cascades.**
+> **Engineering specification, empirical benchmarks, and deployment guide for running the PARAKH Legal Metrology compliance engine on mobile devices, offline edge environments, and cloud hybrid cascades.**
 
 ---
 
@@ -13,7 +13,7 @@ During physical inspection of packaged commodities under the **Legal Metrology (
 
 If an inspection tool relies strictly on heavyweight server models (~110 MB) or requires permanent cloud API connectivity, the system freezes in zero-signal environments. Conversely, if an app relies on naive on-device inference without quantization and pre-filtering, mobile batteries drain rapidly and inference stutters.
 
-This document formalizes the **Edge Performance Architecture** of Themis:
+This document formalizes the **Edge Performance Architecture** of PARAKH:
 * **71.4% to 74.7% reduction in model size** via graph surgery and dynamic INT8 quantization.
 * **On-Device Micro-Noise Pre-Filtering** that eliminates 80% of redundant OCR recognition cycles.
 * **Hardware Acceleration via Android NNAPI** with shape-bucketing to prevent driver JIT recompilations.
@@ -42,7 +42,7 @@ All benchmarks were measured on a single CPU core (AMD Ryzen 9 / Linux x86_64) u
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                     THEMIS MODEL SUITE: FP32 vs. INT8 PROFILING                         │
+│                     PARAKH MODEL SUITE: FP32 vs. INT8 PROFILING                         │
 ├────────────────────────────┬─────────────┬─────────────┬──────────────┬────────────────┤
 │ Model Architecture         │ FP32 Weight │ INT8 Weight │ Size Delta   │ Latency (CPU)  │
 ├────────────────────────────┼─────────────┼─────────────┼──────────────┼────────────────┤
@@ -59,7 +59,7 @@ Standard Paddle2ONNX model exports store model weights inside graph `Constant` n
 ```
 ValueError: Expected conv2d_136.w_0 to be an initializer
 ```
-Themis resolved this through automated graph surgery:
+PARAKH resolved this through automated graph surgery:
 1. Traverse all model nodes identifying `op_type == "Constant"`.
 2. Extract the underlying `TensorProto` attribute value.
 3. Assign the node's output name to the tensor and append it to `graph.initializer`.
@@ -148,7 +148,7 @@ val detSession = env.createSession(detModelBytes, sessionOptions)
                                          │
                                          ▼
                        ┌───────────────────────────────────┐
-                       │   Tier 1: Local Themis Engine     │
+                       │   Tier 1: Local PARAKH Engine     │
                        │   (Rust DBNet + PP-OCRv4 + LMPC)  │
                        └─────────────────┬─────────────────┘
                                          │
@@ -186,9 +186,9 @@ When hackathon judges or evaluators ask: *"Why build a local OCR engine when we 
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────────┐
-│                   FORENSIC AUDIT: THEMIS DETERMINISM vs. PURE LLM                        │
+│                   FORENSIC AUDIT: PARAKH DETERMINISM vs. PURE LLM                        │
 ├──────────────────────────┬─────────────────────────────┬─────────────────────────────────┤
-│ Legal / Technical Vector │ Pure Cloud Multimodal LLM   │ Themis Cascaded Engine          │
+│ Legal / Technical Vector │ Pure Cloud Multimodal LLM   │ PARAKH Cascaded Engine          │
 ├──────────────────────────┼─────────────────────────────┼─────────────────────────────────┤
 │ 1. Court Evidence &      │ Prone to hallucinations.    │ Generates exact pixel bounding  │
 │    Tamper-Proof Audit    │ Autocorrects '95g' to '100g'│ boxes (x, y, w, h) with OCR     │

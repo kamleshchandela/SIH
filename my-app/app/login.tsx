@@ -78,7 +78,7 @@ export default function LoginScreen() {
           <View style={styles.iconCircle}>
             <Ionicons name="scale-outline" size={44} color="#38bdf8" />
           </View>
-          <Text style={styles.brandTitle}>THEMIS</Text>
+          <Text style={styles.brandTitle}>PARAKH</Text>
           <Text style={styles.brandSubtitle}>
             Automated Legal Metrology Compliance Engine
           </Text>

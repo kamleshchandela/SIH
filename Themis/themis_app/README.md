@@ -1,4 +1,4 @@
-# Themis GUI — Legal Metrology Inspection Desktop Client
+# PARAKH GUI — Legal Metrology Inspection Desktop Client
 
 > **Native Linux desktop inspection workstation engineered for statutory enforcement officers and legal metrology auditors under the Legal Metrology Act, 2009, LMPC Rules, 2011, and Jan Vishwas Act, 2023.**
 
@@ -6,7 +6,7 @@
 
 ## 1. Architectural Philosophy & Aesthetics
 
-Themis GUI follows a strict **Apple Minimalist Monochrome Design System**:
+PARAKH GUI follows a strict **Apple Minimalist Monochrome Design System**:
 - **Palette**: Pitch black background (`#000000`), deep charcoal card surfaces (`#141416`), elevated panels (`#1E1E22`), and subtle border delineation (`#28282C`).
 - **Typography**: Clean, sans-serif typography (`Inter` / Apple system font) with clear hierarchy, high legibility, and monospaced code elements.
 - **Color Discipline**: Monochrome silver/white (`#A1A1A6` and `#FFFFFF`) used for all standard status beacons ("Low Risk", "Moderate Risk", "Compliant"), while Apple Crimson (`#FF453A`) is reserved strictly for statutory violations and compounding fines.

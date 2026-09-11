@@ -6,7 +6,7 @@
 
 ## 1. Executive Summary & Problem Context
 
-During early single-image proof-of-concept testing, the Themis OCR engine demonstrated raw throughput of **~14–17 images/second** on host hardware (Intel 28-thread logical CPU). However, after embedding the batch execution pipeline directly into the compiled Rust binary (`themis/src/batch.rs`) with multi-panel SKU pooling, empirical measurements across 50 products showed a peak throughput of **3.1–3.5 targets/second**.
+During early single-image proof-of-concept testing, the PARAKH OCR engine demonstrated raw throughput of **~14–17 images/second** on host hardware (Intel 28-thread logical CPU). However, after embedding the batch execution pipeline directly into the compiled Rust binary (`themis/src/batch.rs`) with multi-panel SKU pooling, empirical measurements across 50 products showed a peak throughput of **3.1–3.5 targets/second**.
 
 This triggered an investigation: **Was this an apparent discrepancy caused by metric unit differences, or was there a genuine algorithmic and architectural performance regression in the Rust engine?**
 

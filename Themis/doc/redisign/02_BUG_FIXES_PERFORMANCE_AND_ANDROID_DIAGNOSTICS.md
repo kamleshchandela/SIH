@@ -1,6 +1,6 @@
 # Chapter 02: Bug Fixes, Performance Optimization & Android Diagnostics
 
-> **Comprehensive post-mortem and forensic analysis of all engineering defects, performance regressions, and platform anomalies resolved during the Themis Mobile Redesign.**
+> **Comprehensive post-mortem and forensic analysis of all engineering defects, performance regressions, and platform anomalies resolved during the PARAKH Mobile Redesign.**
 
 ---
 
@@ -114,7 +114,7 @@ Error: SocketException: Connection failed (OS Error: Operation not permitted, er
 
 ### Root Cause
 1. **Debug vs Release Manifest Merging**: In Flutter, `android.permission.INTERNET` is included by default in the debug source set (`android/app/src/debug/AndroidManifest.xml`) to support hot reload and DevTools. However, the release manifest (`android/app/src/main/AndroidManifest.xml`) did not explicitly declare it.
-2. **Cleartext Traffic Policy**: Android 9 (API 28) and above blocks unencrypted HTTP traffic by default. Because the local Themis backend daemon listens on `http://localhost:8080`, Android's network security policy blocked socket creation.
+2. **Cleartext Traffic Policy**: Android 9 (API 28) and above blocks unencrypted HTTP traffic by default. Because the local PARAKH backend daemon listens on `http://localhost:8080`, Android's network security policy blocked socket creation.
 
 ### Resolution
 Updated [`themis_app/android/app/src/main/AndroidManifest.xml`](file:///home/arch/Projects/backbone/themis_app/android/app/src/main/AndroidManifest.xml):

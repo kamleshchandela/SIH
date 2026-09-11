@@ -1,6 +1,6 @@
 # Advanced Compliance, Evidence Storage, Auth & Direct Export Specification
 
-This specification documents four core enterprise backend engines integrated into **Themis**:
+This specification documents four core enterprise backend engines integrated into **PARAKH**:
 1. **Rule 7 / Schedule II Font Size & Laplacian Blur Detection Engine**
 2. **Evidence Photograph Storage & Static Asset Serving (`/api/v1/evidence/...`)**
 3. **Role-Based Access Control (JWT Authentication & Inspector vs. Admin Roles)**
@@ -24,7 +24,7 @@ Under **Rule 7 read with Schedule II of the Legal Metrology (Packaged Commoditie
 In real-world mobile or web uploads, cameras capture packaging at arbitrary zoom levels and viewing angles. A fundamental problem arises: **Is text illegible due to poor camera capture (motion blur / bad focus), or did the manufacturer physically print sub-statutory text?**
 
 ### 1.2 Mathematical Formulation of Laplacian Sharpness Gate
-Themis implements a discrete Laplacian convolution filter on the luminance channel of each packaging panel before compliance scoring:
+PARAKH implements a discrete Laplacian convolution filter on the luminance channel of each packaging panel before compliance scoring:
 
 $$\Delta I(x, y) = \frac{\partial^2 I}{\partial x^2} + \frac{\partial^2 I}{\partial y^2}$$
 
@@ -51,7 +51,7 @@ The calculated variance $\sigma_L^2$ determines whether an image is legally admi
 | $< 50.0$ | **Severe Blur** | Severe motion blur or out-of-focus capture. | Camera artifact flagged; prevents wrongful manufacturer penalties. |
 
 ### 1.4 Rule 7 Numeral Height Verification
-Themis evaluates the bounding box height of declared Net Quantity and MRP relative to the packaging panel dimensions:
+PARAKH evaluates the bounding box height of declared Net Quantity and MRP relative to the packaging panel dimensions:
 - If no declarations exist, `Rule7NumeralHeight` fails immediately.
 - If numeral height $H_{\text{numeral}} < 14\text{px}$ or relative ratio $\frac{H_{\text{numeral}}}{H_{\text{panel}}} < 0.8\%$, a statutory warning/violation is recorded under Schedule II.
 
@@ -62,7 +62,7 @@ Themis evaluates the bounding box height of declared Net Quantity and MRP relati
 ### 2.1 Storage Architecture
 For Legal Metrology court filings and administrative compounding appeals, raw uncompressed photographic evidence must be preserved verbatim.
 
-On every multi-panel scan (`POST /api/v1/scan-sku`), Themis automatically stores the raw image buffers into a structured directory tree:
+On every multi-panel scan (`POST /api/v1/scan-sku`), PARAKH automatically stores the raw image buffers into a structured directory tree:
 
 ```
 ./evidence/
@@ -98,7 +98,7 @@ cache-control: public, max-age=86400
 
 ## 3. Role-Based Access Control (RBAC) & JWT Engine
 
-Themis provides built-in cryptographic JSON Web Token (JWT) authentication using pure Rust HMAC-SHA256 (`sha2` + `hmac` + `base64`).
+PARAKH provides built-in cryptographic JSON Web Token (JWT) authentication using pure Rust HMAC-SHA256 (`sha2` + `hmac` + `base64`).
 
 ### 3.1 Statutory Roles
 1. **`Inspector`**: Field enforcement officers who upload SKU panels, execute audits, view historical reports, and download notices.
@@ -141,7 +141,7 @@ Themis provides built-in cryptographic JSON Web Token (JWT) authentication using
 - **Admin:** `admin` / `admin@themis2026`
 
 ### 3.4 Axum Route Protection
-Themis provides compile-time type-safe Axum extractors:
+PARAKH provides compile-time type-safe Axum extractors:
 - `AuthenticatedUser(pub Claims)`: Validates signature and expiration; rejects unauthorized callers with `401 Unauthorized`.
 - `RequireAdmin(pub Claims)`: Ensures role is `Admin`; rejects non-admins with `403 Forbidden`.
 
@@ -149,7 +149,7 @@ Themis provides compile-time type-safe Axum extractors:
 
 ## 4. Direct PDF & CSV Statutory Notice Export Engine
 
-Rather than relying on client-side rendering or heavy external Python microservices, Themis generates production-grade statutory audit files directly in pure Rust.
+Rather than relying on client-side rendering or heavy external Python microservices, PARAKH generates production-grade statutory audit files directly in pure Rust.
 
 ### 4.1 RFC 4180 CSV Export
 - **Endpoint:** `GET /api/v1/inspections/{id}/export/csv`

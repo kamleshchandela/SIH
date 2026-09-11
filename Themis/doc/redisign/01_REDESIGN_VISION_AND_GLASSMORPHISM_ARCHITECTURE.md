@@ -1,6 +1,6 @@
 # Chapter 01: Frontend Redesign Vision & Glassmorphic Architecture
 
-> **Themis Mobile-First Client (`themis_app`) — Fluid Glassmorphic UI/UX Redesign**  
+> **PARAKH Mobile-First Client (`themis_app`) — Fluid Glassmorphic UI/UX Redesign**  
 > **Status:** Experimental Branch (`feature/frontend-redesign`)  
 > **Target Platforms:** Android 11+ (Mobile), Linux / macOS / Windows (Desktop)
 
@@ -8,13 +8,13 @@
 
 ## 1. Executive Summary & Design Vision
 
-The initial frontend of **Themis** was built as a utilitarian, monochrome desktop control panel suited for command-line operators and bench auditors. While highly functional, it lacked the tactile ergonomics, visual hierarchy, and polished aesthetic expected of a modern statutory inspection tool deployed to field enforcement officers under the Ministry of Consumer Affairs, Food & Public Distribution.
+The initial frontend of **PARAKH** was built as a utilitarian, monochrome desktop control panel suited for command-line operators and bench auditors. While highly functional, it lacked the tactile ergonomics, visual hierarchy, and polished aesthetic expected of a modern statutory inspection tool deployed to field enforcement officers under the Ministry of Consumer Affairs, Food & Public Distribution.
 
 The **v2.0 Redesign** fundamentally transforms the interface into a **soft white-blue-purple glassmorphic ecosystem** inspired by modern fluid 3D UI paradigms (e.g., Apple visionOS, fluid spatial cards, and illuminated ambient mesh shaders).
 
 ```
 +-------------------------------------------------------------------------+
-|                              THEMIS v2.0                                |
+|                              PARAKH v2.0                                |
 |                        [ Fluid Glass Canvas ]                           |
 |                                                                         |
 |   +-----------------------------------------------------------------+   |

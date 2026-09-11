@@ -28,7 +28,7 @@ The **Ministry of Consumer Affairs, Food & Public Distribution (Directorate of L
 
 ## 2. The Field Officer Persona & Environmental Constraints
 
-Unlike corporate enterprise software used in air-conditioned offices on 4K monitors, **Themis Mobile** is built for real-world field conditions:
+Unlike corporate enterprise software used in air-conditioned offices on 4K monitors, **PARAKH Mobile** is built for real-world field conditions:
 
 ### Operational Realities of Legal Metrology Officers:
 | Environmental Constraint | Impact on Mobile UX | Frontend Architectural Mitigation |

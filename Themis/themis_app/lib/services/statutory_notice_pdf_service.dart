@@ -183,7 +183,7 @@ class StatutoryNoticePdfService {
     stream.writeln('BT 0.7 0.1 0.1 rg /F2 10 Tf 50 ${(curY - 36.0).toStringAsFixed(1)} Td (Compoundable Penalty Fine: INR Rs. $fineInr/-  \\(Payable within 30 days of statutory notice\\)) Tj ET');
 
     // 5. Footer Sign-Off
-    stream.writeln('BT 0.4 0.4 0.4 rg /F1 7.5 Tf 40 45 Td (Generated automatically by Themis Mobile Forensic Legal Metrology Engine - Ministry of Consumer Affairs, GoI.) Tj ET');
+    stream.writeln('BT 0.4 0.4 0.4 rg /F1 7.5 Tf 40 45 Td (Generated automatically by PARAKH Mobile Forensic Legal Metrology Engine - Ministry of Consumer Affairs, GoI.) Tj ET');
     stream.writeln('BT 0.4 0.4 0.4 rg /F2 7.5 Tf 420 45 Td (Authorized Legal Inspector Signature) Tj ET');
 
     // Assemble PDF Byte Structure

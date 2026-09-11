@@ -1,6 +1,6 @@
 # Windows Dependency & Setup Guide
 
-> **A comprehensive guide for developers on Windows 10/11 to install all required dependencies, compilers, database engines, and runtime utilities for building and running Themis.**
+> **A comprehensive guide for developers on Windows 10/11 to install all required dependencies, compilers, database engines, and runtime utilities for building and running PARAKH.**
 
 ---
 
@@ -40,7 +40,7 @@ winget install --id jqlang.jq -e
 ---
 
 ### 2. Rust Toolchain (`rustup` & `cargo`)
-* **Why it's required:** Compiles the high-performance Themis engine.
+* **Why it's required:** Compiles the high-performance PARAKH engine.
 * **Official Download:** [rustup.rs](https://rustup.rs/) (Download `rustup-init.exe` 64-bit).
 * **Winget Command:**
   ```powershell
@@ -73,7 +73,7 @@ winget install --id jqlang.jq -e
      # Using psql in PowerShell (adjust path if needed):
      & "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres -c "CREATE DATABASE themis;"
      ```
-  3. Connection String format for Themis:
+  3. Connection String format for PARAKH:
      ```
      postgres://postgres:<your_password>@localhost:5432/themis
      ```
@@ -108,18 +108,18 @@ winget install --id jqlang.jq -e
 
 ## 3. How ONNX Runtime Works on Windows
 
-* Themis uses the `ort` crate (`v2.0.0-rc.13`).
+* PARAKH uses the `ort` crate (`v2.0.0-rc.13`).
 * **Zero Manual Setup:** On Windows MSVC targets, the `ort` crate automatically downloads the official precompiled `onnxruntime.dll` release from Microsoft and bundles it directly with the executable.
 * You do **not** need to manually build ONNX Runtime or install CUDA. The CPU execution provider runs out of the box with AVX2/AVX-512 SIMD vectorization.
 
 ---
 
-## 4. Building & Running Themis on Windows
+## 4. Building & Running PARAKH on Windows
 
 ### Step 1: Clone Repository
 ```powershell
-git clone https://github.com/vedantdubal-141/Themis.git
-cd Themis
+git clone https://github.com/vedantdubal-141/PARAKH.git
+cd PARAKH
 ```
 
 ### Step 2: Configure Environment Variables
@@ -141,15 +141,15 @@ cargo build --release --manifest-path themis/Cargo.toml
 ```
 **Expected Output:**
 ```
-INFO themis: ⚖️  Starting Themis Legal Metrology Compliance Engine (CPU Mode)
+INFO themis: ⚖️  Starting PARAKH Legal Metrology Compliance Engine (CPU Mode)
 INFO themis::ocr::pipeline: Using PP-OCRv4 SERVER detection model (high-accuracy)
-INFO themis::ocr::pipeline: Initializing Themis OCR pipeline on CPU... dir=themis/models
+INFO themis::ocr::pipeline: Initializing PARAKH OCR pipeline on CPU... dir=themis/models
 INFO themis::ocr::detector: Loading PP-OCR DBNet detection model on CPU...
 INFO themis::ocr::recognizer: Loading PP-OCRv4 recognition model on CPU...
 INFO themis: Connecting to PostgreSQL database at postgres://postgres:***@localhost:5432/themis...
 INFO themis: PostgreSQL connected successfully.
 INFO themis::db::repo: PostgreSQL schema initialized successfully.
-INFO themis: 🚀 Themis REST API listening on http://0.0.0.0:8080
+INFO themis: 🚀 PARAKH REST API listening on http://0.0.0.0:8080
 ```
 
 ### Step 5: Test from PowerShell

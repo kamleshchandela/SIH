@@ -4,12 +4,12 @@
 
 ---
 
-## 1. Complete Themis REST API Specification
+## 1. Complete PARAKH REST API Specification
 
-The frontend client communicates with the Themis Rust backend over 12 RESTful endpoints implemented in `src/services/api.ts`:
+The frontend client communicates with the PARAKH Rust backend over 12 RESTful endpoints implemented in `src/services/api.ts`:
 
 ```
-                               THEMIS REST API SURFACE (12 ENDPOINTS)
+                               PARAKH REST API SURFACE (12 ENDPOINTS)
 +---------------------------------------------------------------------------------------------------+
 | #  | Endpoint                             | Method | Request Payload             | Success Type   |
 |----+--------------------------------------+--------+-----------------------------+----------------|
@@ -57,7 +57,7 @@ The frontend client communicates with the Themis Rust backend over 12 RESTful en
   ```json
   {
     "status": "healthy",
-    "service": "Themis Legal Metrology Compliance Engine",
+    "service": "PARAKH Legal Metrology Compliance Engine",
     "inference_device": "CPU (Vectorized Multi-threaded ONNX Runtime)",
     "active_regulations": "Legal Metrology Act, 2009 | LMPC Rules, 2011 | Jan Vishwas Act, 2023",
     "database_connected": false,
@@ -115,11 +115,11 @@ The frontend client communicates with the Themis Rust backend over 12 RESTful en
 - **Headers:** `Content-Type: application/json`
 - **Request Body (Endpoint 05):**
   ```json
-  { "file_path": "e:/New folder/Themis/dataset/real_products/.../panel_raw_1.jpg" }
+  { "file_path": "e:/New folder/PARAKH/dataset/real_products/.../panel_raw_1.jpg" }
   ```
 - **Request Body (Endpoint 06):**
   ```json
-  { "product_dir": "e:/New folder/Themis/dataset/real_products/8901058000269_Maggi" }
+  { "product_dir": "e:/New folder/PARAKH/dataset/real_products/8901058000269_Maggi" }
   ```
 - **Purpose:** Enables instant server-side filesystem testing without transmitting large image payloads over mobile networks.
 

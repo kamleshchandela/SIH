@@ -208,7 +208,7 @@ class ThemisNativeBridge {
   Future<bool> initialize() async {
     if (_initialized) return true;
     try {
-      DevLogger.instance.info('NATIVE', 'Initializing Themis Native FFI Bridge...');
+      DevLogger.instance.info('NATIVE', 'Initializing PARAKH Native FFI Bridge...');
       final libPath = _resolveLibraryPath();
       final modelsDir = await ensureModelsReady();
       DevLogger.instance.info('NATIVE', 'Library: $libPath | Models: $modelsDir');

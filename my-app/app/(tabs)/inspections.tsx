@@ -206,7 +206,7 @@ function GlassyAnimatedBackground() {
         ]}
       />
 
-      {/* Themis AI Scanning Beam */}
+      {/* PARAKH AI Scanning Beam */}
       <Animated.View
         style={[
           styles.scannerBeam,

@@ -1,6 +1,6 @@
-# Themis Frontend Redesign — Documentation Index
+# PARAKH Frontend Redesign — Documentation Index
 
-> **Official engineering documentation for the mobile-first glassmorphic redesign of Themis (`feature/frontend-redesign`).**
+> **Official engineering documentation for the mobile-first glassmorphic redesign of PARAKH (`feature/frontend-redesign`).**
 
 ---
 

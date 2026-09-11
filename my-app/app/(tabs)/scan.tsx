@@ -202,7 +202,7 @@ function GlassyAnimatedBackground() {
         ]}
       />
 
-      {/* Themis AI Scanning Beam */}
+      {/* PARAKH AI Scanning Beam */}
       <Animated.View
         style={[
           styles.scannerBeam,
@@ -668,7 +668,7 @@ export default function ScanScreen() {
                   <Text style={styles.subCardTitle}>Option 1: Single File Path</Text>
                   <TextInput
                     style={styles.textInput}
-                    placeholder="e:/New folder/Themis/dataset/.../panel_raw_1.jpg"
+                    placeholder="e:/New folder/PARAKH/dataset/.../panel_raw_1.jpg"
                     placeholderTextColor="#52796f"
                     value={filePath}
                     onChangeText={setFilePath}
@@ -689,7 +689,7 @@ export default function ScanScreen() {
                   <Text style={styles.subCardTitle}>Option 2: Entire SKU Folder</Text>
                   <TextInput
                     style={styles.textInput}
-                    placeholder="e:/New folder/Themis/dataset/real_products/8901262010320_Amul_Butter"
+                    placeholder="e:/New folder/PARAKH/dataset/real_products/8901262010320_Amul_Butter"
                     placeholderTextColor="#52796f"
                     value={productDir}
                     onChangeText={setProductDir}

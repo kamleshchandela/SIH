@@ -1,13 +1,13 @@
 # 01 — Embedded ARM Architecture, Edge Bottleneck Analysis & NDK Porting Specification
 
 > **Status:** Production Porting Blueprint & Mobile Edge Architecture  
-> **Engineering specification for embedding the Themis Legal Metrology compliance engine on Android ARM silicon using native Rust NDK shared libraries and Dart FFI.**
+> **Engineering specification for embedding the PARAKH Legal Metrology compliance engine on Android ARM silicon using native Rust NDK shared libraries and Dart FFI.**
 
 ---
 
 ## 1. Executive Summary: The Three Architectural Roadblocks
 
-Until now, running the complete Themis pipeline directly on-device had three major engineering hurdles:
+Until now, running the complete PARAKH pipeline directly on-device had three major engineering hurdles:
 
 ### Roadblock 1: The 115+ MB Model Size Barrier (Now Solved by INT8 Quantization)
 * **The Problem:** The standard upstream PaddleOCR models were exported in FP32 precision (`ppocr_det_server.onnx` was **108.1 MB** and recognition was **7.3 MB**). Shipping a ~120 MB model payload inside a mobile APK for retail field officers operating in rural mandis was prohibitive for storage and distribution.

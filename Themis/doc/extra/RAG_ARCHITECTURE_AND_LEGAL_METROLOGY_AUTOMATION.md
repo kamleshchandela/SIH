@@ -1,6 +1,6 @@
 # RAG Architecture & Legal Metrology Cognitive Copilot
 
-> **Architectural blueprint, empirical Do's & Don'ts, ASCII topology, and implementation strategy for integrating Retrieval-Augmented Generation (RAG) into the Themis Legal Metrology Inspection Engine (SIH Problem Statement 26034).**
+> **Architectural blueprint, empirical Do's & Don'ts, ASCII topology, and implementation strategy for integrating Retrieval-Augmented Generation (RAG) into the PARAKH Legal Metrology Inspection Engine (SIH Problem Statement 26034).**
 
 ---
 
@@ -12,7 +12,7 @@ A core engineering dilemma arises when introducing Generative AI and RAG into re
 - **Judicial Determinism**: An enforcement officer testifying under Section 36 cannot submit probabilistic guesses or hallucinated text as sworn evidence.
 - **Regulatory Complexity**: India's Legal Metrology ecosystem spans the Principal Act (2009), the Packaged Commodities Rules (2011), the 2021 E-Commerce Amendments, the Jan Vishwas Act (2023), and hundreds of commodity-specific provisos and exemptions across Schedule II and FSSAI notifications.
 
-To resolve this dilemma, Themis enforces a **Dual-Tier Decoupled Architecture**:
+To resolve this dilemma, PARAKH enforces a **Dual-Tier Decoupled Architecture**:
 1. **Tier 1 (Deterministic Core)**: High-speed, memory-safe Rust + vectorized ONNX pipeline that extracts ground-truth pixels, computes bounding boxes, and calculates statutory penalties deterministically without LLMs.
 2. **Tier 2 (Cognitive RAG Copilot)**: PostgreSQL `pgvector` + Local/Cloud LLM that retrieves statutory exemptions, drafts court-admissible show-cause notices, and provides conversational legal intelligence to field inspectors.
 
@@ -57,7 +57,7 @@ To resolve this dilemma, Themis enforces a **Dual-Tier Decoupled Architecture**:
 
 ```
 ========================================================================================
-                          THEMIS DUAL-TIER INSPECTION TOPOLOGY
+                          PARAKH DUAL-TIER INSPECTION TOPOLOGY
 ========================================================================================
 
   [ Packaging Image Dossier ] (Front, Back, Side, Top Panels via Camera / Desktop GUI)
@@ -165,7 +165,7 @@ The Copilot takes the verified Tier 1 JSON payload and synthesizes an official *
 NOTICE UNDER SECTION 36(1) OF THE LEGAL METROLOGY ACT, 2009
 READ WITH RULE 6 & RULE 32 OF THE LEGAL METROLOGY (PACKAGED COMMODITIES) RULES, 2011
 
-Notice Reference: THEMIS/DOCA/2026/INSP-073844
+Notice Reference: PARAKH/DOCA/2026/INSP-073844
 Date of Inspection: 08 September 2026
 
 TO:
@@ -219,7 +219,7 @@ When SIH evaluators ask:
 ### The Winning Defense:
 > *"No, evaluators. Relying solely on an LLM for regulatory enforcement is an evidentiary anti-pattern. Large language models hallucinate, struggle with spatial coordinates, have non-deterministic outputs, and cannot be introduced as legal evidence in an Indian court under the Bharatiya Sakshya Adhiniyam, 2023.*
 >
-> *Instead, Themis uses a **Dual-Tier Decoupled Architecture**:*
+> *Instead, PARAKH uses a **Dual-Tier Decoupled Architecture**:*
 > *1. **The Core Engine is 100% Deterministic Rust**: We run vectorized INT8 ONNX DBNet detection and PP-OCRv4 recognition that performs exact pixel-level coordinate mapping and rule math in milliseconds on CPU with zero hallucinations.*
 > *2. **RAG is strictly an Exemption & Legal Synthesis Layer**: We use PostgreSQL `pgvector` to store the Legal Metrology Act, LMPC amendments, and compounding schedules. The RAG Copilot checks category-specific provisos (like USP exemptions on packs $\le 1\text{L}$) and drafts court-admissible Form 1 Show-Cause Notices in seconds.*
 >

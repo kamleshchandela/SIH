@@ -1,4 +1,4 @@
-# 08 — Real-World FMCG Packaging Ambiguities, Statutory Edge-Case Taxonomy & Themis Defense Architecture
+# 08 — Real-World FMCG Packaging Ambiguities, Statutory Edge-Case Taxonomy & PARAKH Defense Architecture
 
 > **A comprehensive regulatory and engineering guide to navigating the complex, deceptive landscape of Indian FMCG packaging, resolving the "Brand vs. Manufacturer" paradox, handling missing packaging panels, and presenting a bulletproof defense to Smart India Hackathon (SIH 26034) judges.**
 
@@ -15,7 +15,7 @@ The **Ministry of Consumer Affairs, Food & Public Distribution** did not formula
 
 An automated engine that passes a product simply because it detected a stylized brand logo is **legally incompetent**. In an enforcement audit, such an engine would allow non-compliant, counterfeit, or un-traced goods to enter the market.
 
-**Themis is built on deterministic statutory rigor.** When Themis flags that an Oreo packet is missing manufacturer details, MRP, and manufacturing dates, **Themis is 100% correct**. The uploaded dataset images physically omitted the back panel where those statutory declarations reside.
+**PARAKH is built on deterministic statutory rigor.** When PARAKH flags that an Oreo packet is missing manufacturer details, MRP, and manufacturing dates, **PARAKH is 100% correct**. The uploaded dataset images physically omitted the back panel where those statutory declarations reside.
 
 This document serves as the definitive field guide to packaging edge cases, explaining the exact legal mechanics, the taxonomy of real-world packaging variations, and how to defend this architecture in front of government evaluators.
 
@@ -56,8 +56,8 @@ Under Rule 6(1)(a) of the LMPC Rules, 2011:
 3. **Contract Manufacturing Complexity (Principal-to-Principal):** Multinational FMCG brands rarely manufacture 100% of their volume in their own plants. An Oreo pack may be contract-packed by a third-party co-packer (e.g., *Bector's Food Specialties Ltd.* or *Sona Biscuits*). Under Rule 6(1)(a), the packaging **must explicitly name the actual manufacturing facility and its physical location**.
 4. **Mandatory Statutory Prefixes:** The law strictly requires qualifying prefixes such as `Mfd. by`, `Manufactured by`, `Packed by`, or `Marketed by`. A floating word `"Cadbury"` on the front panel has zero legal standing as an entity declaration.
 
-#### Structural Fingerprints: How Themis Differentiates Brand Names from Manufacturers
-To prevent false rejections while maintaining strict statutory compliance, Themis evaluates text against **three deterministic structural signals**:
+#### Structural Fingerprints: How PARAKH Differentiates Brand Names from Manufacturers
+To prevent false rejections while maintaining strict statutory compliance, PARAKH evaluates text against **three deterministic structural signals**:
 
 | Dimension | Brand Name / Trademark | Statutory Manufacturer Declaration |
 |---|---|---|
@@ -68,7 +68,7 @@ To prevent false rejections while maintaining strict statutory compliance, Themi
 | **Geographic Postal Data** | **None** | **Mandatory:** Street, City, State, and **6-digit PIN Code** (`\b[1-9][0-9]{5}\b`) |
 
 #### Code Implementation: The 3-Signal Filter
-In [`themis/src/compliance/rules.rs`](file:///home/arch/Projects/backbone/themis/src/compliance/rules.rs), Themis enforces:
+In [`themis/src/compliance/rules.rs`](file:///home/arch/Projects/backbone/themis/src/compliance/rules.rs), PARAKH enforces:
 1. **Prefix Match:** `(?i)(?:mfg|manufactured|mfd|packed|pkd|marketed|mktg)\s*(?:by|at)?`
 2. **Corporate Entity Match:** `(?i)\b(?:pvt\.?\s*ltd\.?|private\s+limited|limited|ltd\.?|llp|industries|foods)\b`
 3. **Postal PIN Code Verification:** `\b[1-9][0-9]{5}\b` (verifying 6-digit Indian Postal PIN codes like `400013`, `110001`, `560024`).
@@ -117,7 +117,7 @@ When an e-commerce platform lists a product using only 2 or 3 glamorous promotio
 
 If an automated compliance engine looks at a listing containing only `front.jpg`, `panel_raw_1.jpg`, `panel_raw_2.jpg`, and `panel_raw_3.jpg` (none of which contain the MRP or manufacturer address) and awards it a "PASS", **that engine has failed its regulatory mission**.
 
-Themis's determination that the Oreo SKU is non-compliant is an accurate enforcement finding: **The uploaded evidence does not substantiate legal compliance.**
+PARAKH's determination that the Oreo SKU is non-compliant is an accurate enforcement finding: **The uploaded evidence does not substantiate legal compliance.**
 
 ---
 
@@ -130,7 +130,7 @@ Cadbury / Coca-Cola Script      ───►  Intertwined Cursive    ───�
 
 - High-value FMCG brands deliberately employ proprietary, calligraphic signatures (e.g. Cadbury's cursive script, Coca-Cola's Spencerian script) designed to function as visual trademarks rather than machine-readable text.
 - Standard scene-text recognition models (PP-OCR, Tesseract, EasyOCR) segment text using horizontal line baselines and CTC decoding. Intertwined, non-standard cursive letterforms are frequently transcribed with phonetic noise (`"Ondboury"` for Cadbury).
-- **Themis Architectural Stance:** Because brand names alone do not fulfill statutory compliance, Themis does not depend on fragile logo recognition to determine legality. Themis searches for standardized legal text blocks (`Manufactured by`, `Regd. Office`, `PIN`, `Email`, `Tel`).
+- **PARAKH Architectural Stance:** Because brand names alone do not fulfill statutory compliance, PARAKH does not depend on fragile logo recognition to determine legality. PARAKH searches for standardized legal text blocks (`Manufactured by`, `Regd. Office`, `PIN`, `Email`, `Tel`).
 
 ---
 
@@ -144,8 +144,8 @@ On dense packaging panels, numerical declarations with mass units appear in mult
 #### The Trap for Naive OCR Systems
 A generic regex searching for `\d+\s*(?:g|grams|kg)` will instantly trigger a **False Positive** on the nutrition table, misclassifying `Carbohydrate 71.9 g` as the statutory Net Quantity of the product.
 
-#### Themis's Engineered Solution
-In [`themis/src/compliance/rules.rs`](file:///home/arch/Projects/backbone/themis/src/compliance/rules.rs), Themis implements an explicit negative lookahead and context filter (`RE_NUTRITION_IGNORE`):
+#### PARAKH's Engineered Solution
+In [`themis/src/compliance/rules.rs`](file:///home/arch/Projects/backbone/themis/src/compliance/rules.rs), PARAKH implements an explicit negative lookahead and context filter (`RE_NUTRITION_IGNORE`):
 ```rust
 // Rejects nutrition table rows from masquerading as statutory Net Quantity
 static RE_NUTRITION_IGNORE: Lazy<Regex> = Lazy::new(|| {
@@ -177,11 +177,11 @@ Let us examine the exact forensic audit executed on the Oreo product sample in o
 - **Statutory Risk Tier:** `CRITICAL (SEVERE)`
 - **Compounding Fine Liability:** ₹1,00,000 (Section 36(1) read with Jan Vishwas Act Section 49).
 
-Themis's audit did not "fail" because of bad OCR. **Themis correctly identified an incomplete evidence dossier.**
+PARAKH's audit did not "fail" because of bad OCR. **PARAKH correctly identified an incomplete evidence dossier.**
 
 ---
 
-## 4. The Themis Defense Strategy: How to Present This to SIH Judges
+## 4. The PARAKH Defense Strategy: How to Present This to SIH Judges
 
 When presenting to judges from the Ministry of Consumer Affairs, follow this structured narrative to demonstrate domain mastery:
 
@@ -191,7 +191,7 @@ When presenting to judges from the Ministry of Consumer Affairs, follow this str
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │ Step 1: Clarify the Law (Rule 6(1)(a) requires Entity + Address, not a Brand).  │
 │ Step 2: Highlight Determinism (We verify evidence; we do not hallucinate).      │
-│ Step 3: Demonstrate Multi-Panel Pooling (When data exists, Themis aggregates it)│
+│ Step 3: Demonstrate Multi-Panel Pooling (When data exists, PARAKH aggregates it)│
 │ Step 4: Quantify Jan Vishwas Penalties (Direct statutory compounding liability).│
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -212,16 +212,16 @@ When presenting to judges from the Ministry of Consumer Affairs, follow this str
 > 
 > In this dataset sample (extracted from Open Food Facts), the contributor only uploaded three photos: the front artwork, the nutrition table, and the ingredients list. The back fin-seal photo was omitted. 
 > 
-> A critical feature of Themis is that **it does not hallucinate compliance**. When an e-commerce platform or uploader omits mandatory statutory panels, Themis correctly flags the missing declarations and calculates compounding liabilities under the Jan Vishwas Act."*
+> A critical feature of PARAKH is that **it does not hallucinate compliance**. When an e-commerce platform or uploader omits mandatory statutory panels, PARAKH correctly flags the missing declarations and calculates compounding liabilities under the Jan Vishwas Act."*
 
 ---
 
-### Judge Question 3: *"How does Themis prevent false rejections when declarations are scattered across different panels?"*
+### Judge Question 3: *"How does PARAKH prevent false rejections when declarations are scattered across different panels?"*
 
 > **The Winning Response:**
-> *"That is precisely why we architected **Multi-Panel SKU Pooling**. Unlike naive single-image scanners that evaluate each photo in isolation, Themis aggregates all panel images (`front.jpg`, `panel_raw_1.jpg`, `panel_raw_2.jpg`, etc.) into a unified physical packaging representation.
+> *"That is precisely why we architected **Multi-Panel SKU Pooling**. Unlike naive single-image scanners that evaluate each photo in isolation, PARAKH aggregates all panel images (`front.jpg`, `panel_raw_1.jpg`, `panel_raw_2.jpg`, etc.) into a unified physical packaging representation.
 > 
-> Every extracted text token is linked to its exact image source and coordinate bounding box. In our 50-product benchmark, products like Thums Up, Maggi, and Kurkure distributed Net Quantity on Panel 1, Nutrition on Panel 2, Manufacturer Address on Panel 3, and Consumer Care on Panel 4. Themis pooled all four panels and correctly awarded compliance. On Oreo, however, the back panel was physically missing from the input evidence."*
+> Every extracted text token is linked to its exact image source and coordinate bounding box. In our 50-product benchmark, products like Thums Up, Maggi, and Kurkure distributed Net Quantity on Panel 1, Nutrition on Panel 2, Manufacturer Address on Panel 3, and Consumer Care on Panel 4. PARAKH pooled all four panels and correctly awarded compliance. On Oreo, however, the back panel was physically missing from the input evidence."*
 
 ---
 
@@ -229,5 +229,5 @@ When presenting to judges from the Ministry of Consumer Affairs, follow this str
 
 1. **Unpredictability is the Problem Space:** Real packaging has folds, reflections, bad lighting, omitted panels, and weird fonts. That is why this problem statement exists.
 2. **Determinism Beats Guesswork:** We do not guess. If an uploader doesn't supply the image containing the MRP, the system reports MRP as missing. That is what a real regulatory tool must do.
-3. **Our Engine is Production-Ready:** Themis successfully extracted 124 tokens from the Oreo images, restored spaces in multi-word text (`Maida Sugar,`, `Fractionated Fat,`), parsed the nutrition table, and validated the net quantity. Everything visible on the images was parsed. What failed was what was missing from the packet photos.
-4. **Severity Tiering Softens Binary Fails:** By implementing 5 graded statutory risk tiers (`COMPLIANT`, `LOW RISK`, `MODERATE RISK`, `HIGH RISK`, `CRITICAL`), Themis provides nuanced regulatory intelligence rather than a blunt fail stamp.
+3. **Our Engine is Production-Ready:** PARAKH successfully extracted 124 tokens from the Oreo images, restored spaces in multi-word text (`Maida Sugar,`, `Fractionated Fat,`), parsed the nutrition table, and validated the net quantity. Everything visible on the images was parsed. What failed was what was missing from the packet photos.
+4. **Severity Tiering Softens Binary Fails:** By implementing 5 graded statutory risk tiers (`COMPLIANT`, `LOW RISK`, `MODERATE RISK`, `HIGH RISK`, `CRITICAL`), PARAKH provides nuanced regulatory intelligence rather than a blunt fail stamp.

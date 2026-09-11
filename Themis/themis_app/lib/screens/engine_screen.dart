@@ -94,7 +94,7 @@ class _EngineScreenState extends State<EngineScreen> {
             children: [
               // Header
               const Text(
-                'THEMIS // SYSTEM & BACKDROP CONFIG',
+                'PARAKH // SYSTEM & BACKDROP CONFIG',
                 style: TextStyle(
                   color: GlassTheme.textMuted,
                   fontSize: 10,
@@ -950,7 +950,7 @@ class _EngineScreenState extends State<EngineScreen> {
           // Option 3: Server one (Remote LAN/WAN)
           _buildModelTierOption(
             option: EngineModelOption.remoteServer,
-            title: '3. Remote Themis Server (LAN / WAN Daemon)',
+            title: '3. Remote PARAKH Server (LAN / WAN Daemon)',
             badge: 'REMOTE WORKSTATION • MULTI-CORE',
             subtitle: 'Delegates inference over LAN/WAN Wi-Fi to central Rust backend. Full FP32 precision, multi-worker thread pooling, and high-throughput batch audits.',
             executionType: 'Rust Axum Daemon • LAN / WAN',

@@ -1,4 +1,4 @@
-# Themis — Automated Legal Metrology (Packaged Commodities) Compliance Engine
+# PARAKH — Automated Legal Metrology (Packaged Commodities) Compliance Engine
 
 > **High-performance, memory-safe, CPU-vectorized compliance inspection engine developed for the Ministry of Consumer Affairs, Food & Public Distribution (SIH Problem Statement 26034).**
 
@@ -11,7 +11,7 @@
 | **01** | [**Problem Statement & Regulatory Framework**](file:///home/arch/Projects/backbone/doc/engine/01_PROBLEM_STATEMENT_AND_REGULATORY_FRAMEWORK.md) | In-depth analysis of SIH 26034, the portal statutory documents, LMPC 2011 Rules, 2021 Amendments, and Jan Vishwas Act compounding. |
 | **02** | [**Technology Stack & Language Comparison**](file:///home/arch/Projects/backbone/doc/engine/02_LANGUAGE_AND_ARCHITECTURE_EVALUATION.md) | Technical comparison of **Rust vs Go vs C++ vs Python vs Zig** across memory safety, SIMD vectorization, ONNX C-API efficiency, and why Rust was selected. |
 | **03** | [**Dataset Acquisition & Ground Truth**](file:///home/arch/Projects/backbone/doc/engine/03_DATASET_ACQUISITION_AND_GROUND_TRUTH.md) | Details of the real-world 199 packaging image dataset across 50 Indian products extracted via Open Food Facts India. |
-| **04** | [**Themis System Architecture & Pipeline**](file:///home/arch/Projects/backbone/doc/engine/04_THEMIS_SYSTEM_ARCHITECTURE_AND_PIPELINE.md) | Detailed specifications of DBNet detection, PP-OCRv4 recognition, LMPC Rule Engine, Axum REST API, and PostgreSQL schema. |
+| **04** | [**PARAKH System Architecture & Pipeline**](file:///home/arch/Projects/backbone/doc/engine/04_THEMIS_SYSTEM_ARCHITECTURE_AND_PIPELINE.md) | Detailed specifications of DBNet detection, PP-OCRv4 recognition, LMPC Rule Engine, Axum REST API, and PostgreSQL schema. |
 | **05** | [**Changelog & Complete File Manifest**](file:///home/arch/Projects/backbone/doc/engine/05_CHANGELOG_AND_FILE_MANIFEST.md) | Full chronological engineering changelog and absolute path manifest of all created project files. |
 | **06** | [**Empirical Audit Benchmarks & Severity Tiering**](file:///home/arch/Projects/backbone/doc/engine/06_EMPIRICAL_AUDIT_BENCHMARKS_AND_SEVERITY_TIERING.md) | 50-product benchmark results, cross-panel evidence case studies, 5-tier statutory risk framework, and native Rust batch engine. |
 | **07** | [**Performance Optimization & Pipeline Pooling**](file:///home/arch/Projects/backbone/doc/engine/07_PERFORMANCE_OPTIMIZATION_AND_PIPELINE_POOLING.md) | Technical post-mortem on throughput regression, root cause analysis (ONNX reloads & thread oversubscription), and channel-based warm pipeline pool architecture. |
@@ -117,7 +117,7 @@ To audit all product SKUs across the dataset using multi-threaded CPU pipeline p
    - The engine automatically resolves models from `themis/models` or `models/`.
    - To specify a custom model directory, use `--models-dir <path>`.
 2. **High-Accuracy Server Detection**:
-   - Themis automatically prioritizes the high-capacity `ppocr_det_server.onnx` (109 MB) model.
+   - PARAKH automatically prioritizes the high-capacity `ppocr_det_server.onnx` (109 MB) model.
    - If missing, it smoothly falls back to the lightweight `ppocr_det.onnx` (2.4 MB).
 3. **Debug Logging**:
    - Run with `RUST_LOG=themis=debug` to print bounding box coordinates, connected component counts, and raw token decoding traces:

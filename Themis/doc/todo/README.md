@@ -1,4 +1,4 @@
-# Themis Engineering Backlog & Frontend Roadmap
+# PARAKH Engineering Backlog & Frontend Roadmap
 
 This directory contains specifications for frontend teammates, documented engineering limitations, and future backlog items.
 

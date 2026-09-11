@@ -192,7 +192,7 @@
 │   ├── fetch_product_dataset.py                   # Parallel Open Food Facts India extraction script
 │   └── batch_scan.py                              # Interactive live CLI batch compliance scanner
 │
-├── themis/                                        # Themis Rust Backend Service
+├── themis/                                        # PARAKH Rust Backend Service
 │   ├── Cargo.toml                                 # Package configuration & dependencies
 │   ├── models/                                    # ONNX Runtime CPU Models
 │   │   ├── ppocr_det_server_int8.onnx             # Quantized Server text detector (27.35 MB, high-accuracy)

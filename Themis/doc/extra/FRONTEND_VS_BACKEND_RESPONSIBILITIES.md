@@ -6,7 +6,7 @@
 
 ## 1. Full Problem Statement Gap Analysis (Backend Status: 90% Complete)
 
-Every single technical and regulatory capability mandated in the **SIH 26034 Problem Statement** (`neo/full-problem-statement.txt`) is now **fully implemented, verified, and active in the Themis backend**:
+Every single technical and regulatory capability mandated in the **SIH 26034 Problem Statement** (`neo/full-problem-statement.txt`) is now **fully implemented, verified, and active in the PARAKH backend**:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -41,11 +41,11 @@ Every single technical and regulatory capability mandated in the **SIH 26034 Pro
 
 ## 2. Architectural Philosophy & Separation of Concerns
 
-To maximize speed, reliability, and code modularity for the Smart India Hackathon (SIH 26034), Themis enforces a strict **separation of concerns**:
+To maximize speed, reliability, and code modularity for the Smart India Hackathon (SIH 26034), PARAKH enforces a strict **separation of concerns**:
 
 ```
 ┌──────────────────────────────────────────────┐        ┌──────────────────────────────────────────────┐
-│            THEMIS BACKEND (RUST)             │        │          THEMIS FRONTEND (WEB/MOBILE)        │
+│            PARAKH BACKEND (RUST)             │        │          PARAKH FRONTEND (WEB/MOBILE)        │
 ├──────────────────────────────────────────────┤        ├──────────────────────────────────────────────┤
 │ • Pure CPU AI Vision (PP-OCRv4 Server Engine)│        │ • Multi-Panel Drag-and-Drop Ingestion UI     │
 │ • Statutory LMPC Rule Verification Engine    │        │ • Interactive Canvas Bounding Box Overlays   │

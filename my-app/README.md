@@ -1,8 +1,8 @@
-# Themis Mobile — Legal Metrology Field Enforcement Client
+# PARAKH Mobile — Legal Metrology Field Enforcement Client
 
 <div align="center">
 
-![Themis Mobile Header](https://img.shields.io/badge/SIH%202026-Problem%20Statement%2026034-004d40?style=for-the-badge)
+![PARAKH Mobile Header](https://img.shields.io/badge/SIH%202026-Problem%20Statement%2026034-004d40?style=for-the-badge)
 ![Expo SDK](https://img.shields.io/badge/Expo%20SDK-54-000000?style=for-the-badge&logo=expo)
 ![React Native](https://img.shields.io/badge/React%20Native-0.81-61DAFB?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)
@@ -20,11 +20,11 @@
 
 ## 🏛️ Executive Summary
 
-**Themis Mobile** is a production-grade, offline-resilient, cross-platform mobile application engineered specifically for field officers of the **Directorate of Legal Metrology**. 
+**PARAKH** (Packaged Article Regulatory Assessment & Knowledge Hub, meaning "to verify/examine") is a production-grade, offline-resilient, cross-platform mobile application engineered specifically for field officers of the **Directorate of Legal Metrology**. 
 
 Enforcing compliance under the **Legal Metrology Act, 2009**, the **Legal Metrology (Packaged Commodities) Rules, 2011 (LMPC)**, and the **Jan Vishwas (Amendment of Provisions) Act, 2023** requires inspecting millions of retail packaged goods across manufacturers, warehouses, and distribution points. Manual inspection using tape measures and visual inspection is slow, subjective, and creates massive enforcement backlogs.
 
-Themis Mobile equips field inspectors with an on-device, camera-integrated scanner that streams packaging faces to an AI OCR and Statutory Rules Engine. Within seconds, it returns a deterministic, legally grounded audit verifying mandatory declarations (MRP, Net Quantity, Dates, Manufacturer Info, Country of Origin, and Numeral Heights), estimates statutory compounding fines, and generates exportable **RFC 4180 CSV audit logs** and **official Directorate Show-Cause Notices in PDF format**.
+PARAKH Mobile equips field inspectors with an on-device, camera-integrated scanner that streams packaging faces to an AI OCR and Statutory Rules Engine. Within seconds, it returns a deterministic, legally grounded audit verifying mandatory declarations (MRP, Net Quantity, Dates, Manufacturer Info, Country of Origin, and Numeral Heights), estimates statutory compounding fines, and generates exportable **RFC 4180 CSV audit logs** and **official Directorate Show-Cause Notices in PDF format**.
 
 ---
 
@@ -34,7 +34,7 @@ The client communicates seamlessly with the **Themis Rust/Axum Engine** via high
 
 ```
 +---------------------------------------------------------------------------------------+
-|                            THEMIS MOBILE FRONTEND (CLIENT)                            |
+|                            PARAKH MOBILE FRONTEND (CLIENT)                            |
 |             React Native 0.81 | Expo SDK 54 | Expo Router v6 | TypeScript             |
 +---------------------------------------------------------------------------------------+
         |                                   |                                   |
@@ -51,7 +51,7 @@ The client communicates seamlessly with the **Themis Rust/Axum Engine** via high
                                             |
                                             v (HTTP / Multipart REST)
 +---------------------------------------------------------------------------------------+
-|                         THEMIS BACKEND ENGINE (RUST / AXUM)                           |
+|                         PARAKH BACKEND ENGINE (RUST / AXUM)                           |
 |                      Live Port: 8080 | Vectorized CPU Inference                       |
 +---------------------------------------------------------------------------------------+
         |                                                                       |
@@ -76,7 +76,7 @@ The client communicates seamlessly with the **Themis Rust/Axum Engine** via high
 
 ## 🔌 Frontend & Backend Connection (Zero Configuration)
 
-Connecting physical mobile phones to a local developer server often causes network headaches due to shifting IP addresses on Wi-Fi or mobile hotspots. Themis Mobile solves this completely with **Zero-Config Dynamic Host Discovery**:
+Connecting physical mobile phones to a local developer server often causes network headaches due to shifting IP addresses on Wi-Fi or mobile hotspots. PARAKH Mobile solves this completely with **Zero-Config Dynamic Host Discovery**:
 
 ### 1. Dynamic Metro Auto-Discovery
 The app automatically extracts the development laptop's active IP address from the Metro bundler connection at runtime using `expo-constants`:

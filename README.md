@@ -2,8 +2,10 @@
 
 <img src="my-app/assets/images/sih_2026_logo.png" width="280" alt="Smart India Hackathon 2026 Logo" />
 
-# ⚖️ THEMIS
+# ⚖️ PARAKH
 ### Automated Legal Metrology Packaged Commodity Compliance & Field Enforcement System
+
+*(**PARAKH**: **P**ackaged **A**rticle **R**egulatory **A**ssessment & **K**nowledge **H**ub — naturally meaning "to verify/examine")*
 
 ![SIH 2026](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-004d40?style=for-the-badge)
 ![Problem Statement 26034](https://img.shields.io/badge/Problem%20Statement-26034-blue?style=for-the-badge)
@@ -15,9 +17,9 @@
 
 ---
 
-## 📌 What is THEMIS?
+## 📌 What is PARAKH?
 
-**THEMIS** is an automated field inspection system that empowers Legal Metrology officers to audit retail packaged goods in seconds using their smartphone camera.
+**PARAKH** is an automated field inspection system that empowers Legal Metrology officers to audit retail packaged goods in seconds using their smartphone camera.
 
 - 📸 **Instant Packaging Audit**: Replaces manual measuring tapes and paper checklists with on-device camera scanning.
 - 🤖 **AI OCR & Rule Engine**: Automatically extracts text and verifies mandatory declarations (MRP, Net Quantity, Dates, Manufacturer info, and Numeral Heights) under the **Legal Metrology Act, 2009** & **LMPC Rules, 2011**.

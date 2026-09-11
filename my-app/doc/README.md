@@ -1,4 +1,4 @@
-# Themis Mobile — Legal Metrology Field Enforcement Client Documentation
+# PARAKH Mobile — Legal Metrology Field Enforcement Client Documentation
 
 > **Production-grade, offline-resilient, cross-platform React Native (Expo SDK 54 / Expo Router v6) mobile client developed for the Ministry of Consumer Affairs, Food & Public Distribution (SIH Problem Statement 26034).**
 
@@ -23,7 +23,7 @@
 
 ```
 +-------------------------------------------------------------------------------+
-|                       THEMIS MOBILE FRONTEND (CLIENT)                         |
+|                       PARAKH MOBILE FRONTEND (CLIENT)                         |
 |                    React Native (v0.81) | Expo SDK 54 | Expo Router           |
 +-------------------------------------------------------------------------------+
                                         |
@@ -42,7 +42,7 @@
                                         |
                                         v HTTP / REST (12 Endpoints)
 +-------------------------------------------------------------------------------+
-|                    THEMIS LEGAL METROLOGY BACKEND ENGINE                      |
+|                    PARAKH LEGAL METROLOGY BACKEND ENGINE                      |
 |                  Rust (Axum) | PP-OCRv4 | ONNX Runtime CPU                    |
 +-------------------------------------------------------------------------------+
 ```
@@ -54,7 +54,7 @@
 ### 1. Prerequisites
 - **Node.js**: v18.x or v20.x+ installed.
 - **Expo Go App**: Installed on physical Android or iOS device (from Google Play Store / Apple App Store).
-- **Themis Backend Engine**: Running locally on `http://<YOUR_LOCAL_IP>:8080`.
+- **PARAKH Backend Engine**: Running locally on `http://<YOUR_LOCAL_IP>:8080`.
 
 ### 2. Install Dependencies
 Navigate to the mobile app directory:

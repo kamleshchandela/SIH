@@ -23,7 +23,7 @@ class ThemisApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Themis Legal Metrology Inspector',
+      title: 'PARAKH Legal Metrology Inspector',
       debugShowCheckedModeBanner: false,
       theme: GlassTheme.theme,
       home: const MainNavigationShell(),

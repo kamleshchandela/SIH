@@ -700,7 +700,7 @@ class _InspectScreenState extends State<InspectScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'THEMIS // REGULATORY COGNITION',
+              'PARAKH // REGULATORY COGNITION',
               style: TextStyle(
                 color: GlassTheme.textMuted,
                 fontSize: 10,

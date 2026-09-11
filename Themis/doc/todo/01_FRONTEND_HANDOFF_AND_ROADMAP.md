@@ -1,6 +1,6 @@
 # Frontend Handoff, API Contract & System Limitations
 
-> **Technical specification for the frontend development team outlining the active Themis backend REST API, data contracts, client-side report generation (XLSX & PDF), and the architectural rationale regarding e-commerce scrapers.**
+> **Technical specification for the frontend development team outlining the active PARAKH backend REST API, data contracts, client-side report generation (XLSX & PDF), and the architectural rationale regarding e-commerce scrapers.**
 
 ---
 
@@ -14,7 +14,7 @@ While the SIH 26034 problem statement mentions scanning e-commerce listings, **r
    - Real-time automated scraping from server IPs triggers immediate HTTP `403 Forbidden` responses or challenge loops, making live demos brittle and prone to catastrophic failure on stage.
 2. **Headless Browser Resource Exhaustion:**
    - Modern e-commerce pages are single-page applications (Next.js, React) requiring headless browser runtimes (Puppeteer, Playwright, Selenium) to execute client-side JavaScript hydration.
-   - Spawning headless Chromium instances consumes **800 MB to 1.5 GB of RAM per session**, completely undermining Themis's ultra-lightweight, memory-efficient Rust backend (~30 MB footprint).
+   - Spawning headless Chromium instances consumes **800 MB to 1.5 GB of RAM per session**, completely undermining PARAKH's ultra-lightweight, memory-efficient Rust backend (~30 MB footprint).
 3. **Missing Regulatory Data on Electronics & Non-Grocery Catalogues:**
    - Over **90% of e-commerce listings for electronics, apparel, and hardware** display only promotional 3D marketing renders or front-facing glamour shots.
    - The statutory regulatory panel (back panel with registered manufacturer address, PIN code, FSSAI license, and compounding details) is almost never photographed by marketplace sellers.
@@ -26,14 +26,14 @@ When evaluators ask: *"Can your system inspect live Amazon or Blinkit listings?"
 
 > **The Recommended Judge Defense:**
 > *"Our engine is designed to enforce the Legal Metrology Act, 2009 with statutory evidence integrity. 
-> Rather than relying on brittle, easily blocked web scrapers that frequently fail due to Cloudflare protection, Themis provides high-throughput REST APIs (`/api/v1/scan-sku` and `/api/v1/scan-product-path`) that ingest digital image dossiers supplied either via official marketplace partner APIs, compliance auditor uploads, or catalogue repository syncs. 
+> Rather than relying on brittle, easily blocked web scrapers that frequently fail due to Cloudflare protection, PARAKH provides high-throughput REST APIs (`/api/v1/scan-sku` and `/api/v1/scan-product-path`) that ingest digital image dossiers supplied either via official marketplace partner APIs, compliance auditor uploads, or catalogue repository syncs. 
 > If an e-commerce platform lists a product without the mandatory statutory panels, our multi-panel pooling engine flags an incomplete dossier and assesses compounding penalties under Section 36(1) read with the 2021 E-Commerce Amendments."*
 
 ---
 
 ## 2. Active Backend REST API Contract (What We Built)
 
-The Themis backend runs on Rust (Axum framework) with pure CPU ONNX Runtime vectorization.
+The PARAKH backend runs on Rust (Axum framework) with pure CPU ONNX Runtime vectorization.
 
 ### Base URL
 ```
@@ -56,7 +56,7 @@ Configured with `DefaultBodyLimit::max(100MB)`. The backend natively supports hi
 ```json
 {
   "status": "healthy",
-  "service": "Themis Legal Metrology Compliance Engine",
+  "service": "PARAKH Legal Metrology Compliance Engine",
   "inference_device": "CPU (Vectorized Multi-threaded ONNX Runtime)",
   "active_regulations": "Legal Metrology Act, 2009 | LMPC Rules, 2011 | Jan Vishwas Act, 2023",
   "timestamp": "2026-09-06T13:27:11.571135646+00:00"

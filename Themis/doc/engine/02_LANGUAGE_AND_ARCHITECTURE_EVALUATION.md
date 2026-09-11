@@ -64,13 +64,13 @@ While Python dominates prototype ML research due to Pandas and PyTorch, deployin
 
 ---
 
-## 3. Why Rust Was Selected for Themis
+## 3. Why Rust Was Selected for PARAKH
 
 Rust provides the optimal convergence of **C++ level raw execution speed**, **guaranteed compile-time memory safety**, and **modern web ergonomics**:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        Why Rust Wins for Themis                        │
+│                        Why Rust Wins for PARAKH                        │
 ├────────────────────────────────┬───────────────────────────────────────┤
 │ 1. Zero-Cost Memory Safety     │ Fearless concurrency without GC pauses│
 │ 2. Native LLVM SIMD Vectoring  │ Sub-5ms image normalization via AVX2  │
@@ -80,7 +80,7 @@ Rust provides the optimal convergence of **C++ level raw execution speed**, **gu
 └────────────────────────────────┴───────────────────────────────────────┘
 ```
 
-### Key Technical Advantages in Themis:
+### Key Technical Advantages in PARAKH:
 1. **Native CPU Vectorization (`ort` + `ndarray`):**
    - The ONNX Runtime integration in Rust operates directly against continuous `ndarray::Array4` memory layouts. Image normalization `(pixel/255.0 - mean) / std` is vectorized using LLVM SIMD intrinsics (AVX-512 / AVX2 / NEON) with zero copying.
 2. **Deterministic Sub-200ms CPU Inference:**

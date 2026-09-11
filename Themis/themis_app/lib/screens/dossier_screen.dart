@@ -355,7 +355,7 @@ class _DossierScreenState extends State<DossierScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
                       Text(
-                        'THEMIS // HISTORICAL DOSSIERS',
+                        'PARAKH // HISTORICAL DOSSIERS',
                         style: TextStyle(
                           color: GlassTheme.textMuted,
                           fontSize: 10,

@@ -25,7 +25,7 @@ A common question during field deployment is whether the mobile app requires on-
 |                                                                         |
 |  [ ANDROID SMARTPHONE / TABLET ]            [ BACKEND ENGINE (HOST/LAN) ]|
 |  +-----------------------------+           +--------------------------+ |
-|  | Themis Mobile Client (Flutter) |  HTTP POST | Themis Rust Engine (Axum) | |
+|  | PARAKH Mobile Client (Flutter) |  HTTP POST | PARAKH Rust Engine (Axum) | |
 |  | - Camera Capture            | --------> | - Multi-threaded ONNX    | |
 |  | - Native SAF Document Picker | (Multipart) - DBNet Text Detection   | |
 |  | - Specular Glass UI Cards   |           | - PP-OCRv4 Text Recog    | |
@@ -38,7 +38,7 @@ A common question during field deployment is whether the mobile app requires on-
 
 ### Why Inference is Centralized in the Rust Backend:
 1. **Model Weight Bloat**: Bundling full DBNet and PP-OCR models directly into the APK would increase the package size from ~58 MB to over **200 MB**.
-2. **Statutory Compliance Rule Complexity**: The Themis rule engine comprises over **10,000 lines of deterministic Rust code** implementing:
+2. **Statutory Compliance Rule Complexity**: The PARAKH rule engine comprises over **10,000 lines of deterministic Rust code** implementing:
    - Mandatory LMPC Rule 6 declarations (MRP, Net Qty, Dates, Manufacturer, Customer Care).
    - Area-based statutory font-size ratio verifications (Principal Display Panel math).
    - Jan Vishwas Act (2023) compounding penalty calculations.

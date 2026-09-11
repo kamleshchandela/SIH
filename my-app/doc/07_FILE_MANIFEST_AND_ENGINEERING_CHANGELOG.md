@@ -1,6 +1,6 @@
 # 07 — File Manifest & Engineering Changelog
 
-> **Complete absolute path manifest of all codebase files, accompanied by an in-depth chronological engineering changelog detailing the iterative development of Themis Mobile.**
+> **Complete absolute path manifest of all codebase files, accompanied by an in-depth chronological engineering changelog detailing the iterative development of PARAKH Mobile.**
 
 ---
 
@@ -28,7 +28,7 @@ my-app/
 │   ├── context/
 │   │   └── AuthContext.tsx       # Auto-Detecting Wi-Fi IP & JWT Auth State Provider
 │   ├── services/
-│   │   └── api.ts                # All 12/12 Themis REST API Endpoints & File Downloader
+│   │   └── api.ts                # All 12/12 PARAKH REST API Endpoints & File Downloader
 │   ├── types/
 │   │   └── themis.ts             # Complete TypeScript Interfaces Matching Rust Structs
 │   └── utils/
@@ -47,7 +47,7 @@ my-app/
 
 ### Phase 1: Foundation & Unified REST Client
 - Initialized clean React Native (Expo SDK 54 / Expo Router v6) application.
-- Implemented `src/types/themis.ts` mirroring the 1:1 data models of the Themis Rust engine (`ComplianceReport`, `RuleEvaluation`, `StatutoryPenalty`, `InspectionStats`).
+- Implemented `src/types/themis.ts` mirroring the 1:1 data models of the PARAKH Rust engine (`ComplianceReport`, `RuleEvaluation`, `StatutoryPenalty`, `InspectionStats`).
 - Implemented `src/services/api.ts` connecting to all 12 REST API endpoints.
 
 ### Phase 2: Role-Based Authentication & Session Management

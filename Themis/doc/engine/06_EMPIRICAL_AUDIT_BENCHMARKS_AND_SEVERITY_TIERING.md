@@ -10,13 +10,13 @@ In traditional automated inspection, checking systems often apply a crude binary
    - Cap / Neck / Crimp: Batch number, date of packaging (Rule 6(1)(d)), and Maximum Retail Price (Rule 6(1)(e)).
    Evaluating a single image panel in isolation produces a false-positive violation rate exceeding **99%**.
 2. **The Binary "FAIL" Inequity:** Marking a package that satisfies 5 out of 7 mandatory statutory requirements (e.g. Kurkure or Maggi with verified manufacturer address, postal PIN, consumer care phone, consumer care email, and country of origin) as a flat `FAIL` obscures the reality of compliance. It treats minor packaging omissions identically to unlabelled counterfeit goods.
-3. **The Multi-Panel SKU Solution:** Themis implements **Multi-Image SKU Pooling** to combine all physical panels (`front.jpg`, `panel_raw_1.jpg`, `panel_raw_2.jpg`, `panel_raw_3.jpg`) into a single pooled token array, evaluating compliance holistically and classifying items into **Graded Statutory Risk Tiers**.
+3. **The Multi-Panel SKU Solution:** PARAKH implements **Multi-Image SKU Pooling** to combine all physical panels (`front.jpg`, `panel_raw_1.jpg`, `panel_raw_2.jpg`, `panel_raw_3.jpg`) into a single pooled token array, evaluating compliance holistically and classifying items into **Graded Statutory Risk Tiers**.
 
 ---
 
 ## 2. Graded Statutory Severity Risk Framework
 
-To align automated audits with actual enforcement protocols used by Legal Metrology Controllers and District Inspectors, Themis classifies packages into **5 Statutory Risk Tiers**:
+To align automated audits with actual enforcement protocols used by Legal Metrology Controllers and District Inspectors, PARAKH classifies packages into **5 Statutory Risk Tiers**:
 
 ```
  ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -46,7 +46,7 @@ To align automated audits with actual enforcement protocols used by Legal Metrol
 
 ## 3. Empirical 50-Product Benchmark Audit
 
-Themis was benchmarked across **50 complete Indian FMCG product SKUs (199 packaging panels)** extracted from Open Food Facts India.
+PARAKH was benchmarked across **50 complete Indian FMCG product SKUs (199 packaging panels)** extracted from Open Food Facts India.
 
 ### Execution Metrics (Native Compiled Rust)
 
@@ -122,8 +122,8 @@ TOP MISSING MANDATORY DECLARATIONS:
 - **Assigned Risk Tier:** `CRITICAL (SEVERE)`
 - **Key Finding (Illegal Unit under Rule 13):**
   - OCR extracted `"NetWt.:1.94oz(55gms"`.
-  - Themis detected and flagged `55gms` as a **statutory violation of Rule 13**, which mandates standard SI symbols (`g`, `kg`, `ml`, `l`) and expressly prohibits non-standard suffixes like `gms` or imperial measures (`oz`).
-- **Bug Fix Verification:** This image previously caused a mathematical non-transitivity sort panic in standard algorithms; Themis's line-quantized total order algorithm processed all 4 panels in **1.42 seconds** without error.
+  - PARAKH detected and flagged `55gms` as a **statutory violation of Rule 13**, which mandates standard SI symbols (`g`, `kg`, `ml`, `l`) and expressly prohibits non-standard suffixes like `gms` or imperial measures (`oz`).
+- **Bug Fix Verification:** This image previously caused a mathematical non-transitivity sort panic in standard algorithms; PARAKH's line-quantized total order algorithm processed all 4 panels in **1.42 seconds** without error.
 
 ---
 

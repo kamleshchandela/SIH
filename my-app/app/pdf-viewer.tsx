@@ -380,7 +380,7 @@ function generateNoticeHtml(report: ComplianceReport): string {
     </div>
     <div class="auth-text">
       <strong>Digitally Authenticated Statutory Record</strong><br>
-      Issued by Themis Regulatory Engine under Section 65B of Indian Evidence Act, 1872.<br>
+      Issued by PARAKH Regulatory Engine under Section 65B of Indian Evidence Act, 1872.<br>
       <em>Certified: ${formatDateTime(report.timestamp)}</em>
     </div>
   </div>

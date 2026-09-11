@@ -1,15 +1,15 @@
 # 05 — Screen-by-Screen Deep Dive & User Flows
 
-> **An easy-to-read, comprehensive guide explaining every screen, user journey, visual element, and backend interaction in the Themis Mobile application.**
+> **An easy-to-read, comprehensive guide explaining every screen, user journey, visual element, and backend interaction in the PARAKH Mobile application.**
 
 ---
 
 ## 🧭 Application Navigation Map
 
-Themis Mobile consists of **9 dedicated screens** designed to make field enforcement fast, intuitive, and foolproof:
+PARAKH Mobile consists of **9 dedicated screens** designed to make field enforcement fast, intuitive, and foolproof:
 
 ```
-THEMIS MOBILE APPLICATION
+PARAKH MOBILE APPLICATION
 │
 ├── 1. Authentication Layer
 │   └── app/login.tsx                     # Officer Login, Role Selection & Server Configuration
@@ -69,7 +69,7 @@ The Dashboard is the operational home screen. It gives the officer an instant sn
    - Shows a pulsating green dot with `Live Online` confirming an active session.
 2. **Engine & AI Core Status Card**:
    - **Telemetry Header**: A hardware microchip icon with a live connection badge (`Live Online`).
-   - **Engine Core**: Displays *Themis Legal Metrology Compliance Engine*.
+   - **Engine Core**: Displays *PARAKH Legal Metrology Compliance Engine*.
    - **AI OCR Engine**: Confirms the active machine learning runtime: *CPU (Vectorized Multi-threaded ONNX Runtime)*.
    - **Enforced Acts**: Explicitly cites the governing Indian laws:
      - *Legal Metrology Act, 2009*
@@ -125,7 +125,7 @@ This is the primary tool used during field inspections. Officers can take photos
 #### Mode 3: Server Path Audit (`Server Path`)
 * **When to use**: Designed for lab testing, automated batch verification, and inspecting pre-loaded high-resolution image datasets already stored on the server.
 * **Workflow**:
-  - Enter the absolute file path or directory path (e.g. `e:/SIH/Themis/dataset/...`).
+  - Enter the absolute file path or directory path (e.g. `e:/SIH/PARAKH/dataset/...`).
   - Tap **"Audit Server Image File"** or **"Audit Entire Product Folder"**.
 
 ---
@@ -133,7 +133,7 @@ This is the primary tool used during field inspections. Officers can take photos
 ## 4. Inspection Repository & History (`app/(tabs)/inspections.tsx`)
 
 ### 📌 What is this screen for?
-Enables officers to search, browse, and review past field inspections stored in the centralized Themis database.
+Enables officers to search, browse, and review past field inspections stored in the centralized PARAKH database.
 
 ### 🖼️ Visual Interface:
 <div align="center">

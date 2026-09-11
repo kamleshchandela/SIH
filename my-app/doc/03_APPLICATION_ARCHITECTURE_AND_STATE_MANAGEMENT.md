@@ -25,14 +25,14 @@ The mobile application enforces a strict unidirectional data flow and clean sepa
                                       v (Instantiates ApiClient)
 +-------------------------------------------------------------------------------+
 |                            SERVICE & API LAYER                                |
-|                src/services/api.ts (Themis Unified REST Client)                |
+|                src/services/api.ts (PARAKH Unified REST Client)                |
 |  - 12 REST Endpoints             - Multipart FormData Streamer                |
 |  - 401 Session Interceptor       - Native FileSystem Downloader               |
 +-------------------------------------------------------------------------------+
                                       |
                                       v (HTTP / HTTPS)
 +-------------------------------------------------------------------------------+
-|                       THEMIS RUST BACKEND ENGINE (8080)                       |
+|                       PARAKH RUST BACKEND ENGINE (8080)                       |
 +-------------------------------------------------------------------------------+
 ```
 

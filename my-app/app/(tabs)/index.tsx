@@ -199,7 +199,7 @@ function GlassyAnimatedBackground() {
         ]}
       />
 
-      {/* Themis AI Scanning Beam */}
+      {/* PARAKH AI Scanning Beam */}
       <Animated.View
         style={[
           styles.scannerBeam,
@@ -360,7 +360,7 @@ export default function DashboardScreen() {
             <View style={styles.loadingBox}>
               <ActivityIndicator size="small" color="#166534" />
               <Text style={styles.loadingText}>
-                Connecting to Themis Engine ({api.getBaseUrl()})...
+                Connecting to PARAKH Engine ({api.getBaseUrl()})...
               </Text>
             </View>
           ) : healthError ? (

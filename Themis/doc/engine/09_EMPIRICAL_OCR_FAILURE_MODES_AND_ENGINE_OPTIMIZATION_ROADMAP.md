@@ -1,7 +1,7 @@
 # 09 — Empirical Packaging OCR Failure Modes, Real-World SKU Audits & Engine Optimization Roadmap
 
 > **Status:** Implemented (Phase 1 Resilient Regexes & Column Sort) | Planned (Vernacular Pipelines)  
-> **A rigorous empirical analysis of real-world smartphone packaging scans (`Yippie Noodles`, `SaveMore Dishwash Liquid`, `Saffola Rolled Oats`), diagnosing the 7 statutory failure modes of computer vision on FMCG commodities, and defining the architectural optimization roadmap for Themis.**
+> **A rigorous empirical analysis of real-world smartphone packaging scans (`Yippie Noodles`, `SaveMore Dishwash Liquid`, `Saffola Rolled Oats`), diagnosing the 7 statutory failure modes of computer vision on FMCG commodities, and defining the architectural optimization roadmap for PARAKH.**
 
 ---
 
@@ -20,7 +20,7 @@ This document records the empirical results of auditing three real-world consume
 
 ## 2. Empirical Benchmark Matrix Across Test Datasets
 
-| Dataset & SKU | Scanned Mode | Laplacian Sharpness | Extracted Tokens | Inference Time (CPU) | Themis Engine Score | Ground Truth Verdict | Primary Failure Mode |
+| Dataset & SKU | Scanned Mode | Laplacian Sharpness | Extracted Tokens | Inference Time (CPU) | PARAKH Engine Score | Ground Truth Verdict | Primary Failure Mode |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Yippie Noodles**<br>`dataset/mine/yippie/fullimage` | Single wide photo | 243.2 (Sharp) | 50 tokens | 5.34s | **0.0% (Critical Risk)** | Fully Compliant | Side gusset flap concealed under fold; missed Rule 6(1)(a) & 6(1)(g) |
 | **Yippie Noodles**<br>`dataset/mine/yippie/halfimage` | 5-panel macro pool | 215.1 – 541.6 | **220 tokens (4.4x)** | 24.50s | **62.5% (Pass/Warn)** | Fully Compliant | Multi-panel revealed gussets; dot-matrix CIJ fragmented `420g` & `₹90.00` |
@@ -34,7 +34,7 @@ This document records the empirical results of auditing three real-world consume
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                     THEMIS REAL-WORLD PACKAGING OCR FAILURE MODES                      │
+│                     PARAKH REAL-WORLD PACKAGING OCR FAILURE MODES                      │
 ├──────────────────────────┬──────────────────────────┬──────────────────────────────────┤
 │ 1. Orientation Inversion │ 2. Column Interleaving   │ 3. Inkjet Dot-Matrix Disconnect  │
 │ • Phone sensor landscape │ • 2-column label matrix  │ • Low-DPI CIJ droplet fonts      │
@@ -198,13 +198,13 @@ Because the large numeral is physically higher on the packaging than the statuto
 
 ---
 
-## 4. Themis Architectural Optimization Roadmap
+## 4. PARAKH Architectural Optimization Roadmap
 
 To eliminate these false-positive rejections and achieve production-grade accuracy across real-world packaging, the following 6 architectures are designed for implementation:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                      THEMIS PIPELINE OPTIMIZATION ROADMAP                              │
+│                      PARAKH PIPELINE OPTIMIZATION ROADMAP                              │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                        │
 │   Raw Image ──► [1. 4-Way Auto-Orientation & EXIF Normalizer]                          │
@@ -329,7 +329,7 @@ static RE_MFD_DATE_RESILIENT: LazyLock<Regex> = LazyLock::new(|| {
 
 ## 5. Conclusion & SIH Presentation Defense
 
-When presenting Themis to the **Ministry of Consumer Affairs** and SIH judges:
+When presenting PARAKH to the **Ministry of Consumer Affairs** and SIH judges:
 1. **Acknowledge Real-World Chaos:** "Toy hackathon projects only work on downloaded e-commerce product renders. Real-world FMCG packaging is plagued by 3D flexible folds, dot-matrix inkjet degradation, and two-column interleaving."
-2. **Demonstrate Deterministic Rigor:** "Themis detected 225 tokens on SaveMore Dishwash in 15.5 seconds on pure CPU with 0 MB VRAM, passing all address PINs and Rule 7 heights. The discovered failures highlight why multi-panel pooling and 2D spatial windowing are necessary in national enforcement infrastructure."
-3. **The Defense:** "By identifying these exact 7 failure modes and implementing column-aware spatial windowing and auto-orientation, Themis bridges the gap between theoretical OCR and field-deployable enforcement."
+2. **Demonstrate Deterministic Rigor:** "PARAKH detected 225 tokens on SaveMore Dishwash in 15.5 seconds on pure CPU with 0 MB VRAM, passing all address PINs and Rule 7 heights. The discovered failures highlight why multi-panel pooling and 2D spatial windowing are necessary in national enforcement infrastructure."
+3. **The Defense:** "By identifying these exact 7 failure modes and implementing column-aware spatial windowing and auto-orientation, PARAKH bridges the gap between theoretical OCR and field-deployable enforcement."

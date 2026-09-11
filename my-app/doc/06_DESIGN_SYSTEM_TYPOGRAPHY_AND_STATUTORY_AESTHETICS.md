@@ -1,15 +1,15 @@
 # 06 — Design System, Typography & Statutory Aesthetics
 
-> **Technical specification of the Themis Mobile design system, color tokens, typography scales, contrast standards, and official government document formatting.**
+> **Technical specification of the PARAKH Mobile design system, color tokens, typography scales, contrast standards, and official government document formatting.**
 
 ---
 
 ## 1. Statutory Color Palette & Tokens
 
-Themis Mobile enforces a curated, high-contrast color palette designed specifically for official enforcement environments. Every color serves a precise statutory semantic meaning:
+PARAKH Mobile enforces a curated, high-contrast color palette designed specifically for official enforcement environments. Every color serves a precise statutory semantic meaning:
 
 ```
-                                  THEMIS COLOR SYSTEM
+                                  PARAKH COLOR SYSTEM
 +-----------------------------------------------------------------------------------------+
 | Category         | Hex Code   | Background Tint | Usage                                 |
 |------------------+------------+-----------------+---------------------------------------|

@@ -179,7 +179,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Dashboard',
-          headerTitle: 'Themis Enforcement',
+          headerTitle: 'PARAKH Enforcement',
         }}
       />
       <Tabs.Screen

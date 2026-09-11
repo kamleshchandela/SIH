@@ -7,11 +7,11 @@
 
 ## 1. Executive Summary & Design System
 
-Themis Desktop (`themis_app/`) provides an institutional, high-performance visual interface to the Themis Rust compliance engine. It is designed to satisfy the rigorous evidentiary demands of legal metrology inspections without sacrificing usability, speed, or aesthetic quality.
+PARAKH Desktop (`themis_app/`) provides an institutional, high-performance visual interface to the PARAKH Rust compliance engine. It is designed to satisfy the rigorous evidentiary demands of legal metrology inspections without sacrificing usability, speed, or aesthetic quality.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                            THEMIS DESKTOP GUI                               │
+│                            PARAKH DESKTOP GUI                               │
 │                         (Apple Minimalist Dark)                             │
 ├─────────────────┬───────────────────────────────────────────────────────────┤
 │ Top Bar         │ • Mode Indicator ("Statutory Packaging Inspection")      │

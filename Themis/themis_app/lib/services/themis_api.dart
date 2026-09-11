@@ -58,7 +58,7 @@ class ThemisApiService {
       ),
     );
 
-    DevLogger.instance.info('SYSTEM', 'Themis API Service initialized with host: $baseUrl');
+    DevLogger.instance.info('SYSTEM', 'PARAKH API Service initialized with host: $baseUrl');
   }
 
   void updateBaseUrl(String url) {
@@ -85,9 +85,9 @@ class ThemisApiService {
       final res = await _dio.get('$baseUrl/api/v1/health');
       final healthy = res.statusCode == 200;
       if (healthy) {
-        DevLogger.instance.success('HEALTH', 'Themis engine is ONLINE (200 OK)');
+        DevLogger.instance.success('HEALTH', 'PARAKH engine is ONLINE (200 OK)');
       } else {
-        DevLogger.instance.warn('HEALTH', 'Themis engine returned non-200 status: ${res.statusCode}');
+        DevLogger.instance.warn('HEALTH', 'PARAKH engine returned non-200 status: ${res.statusCode}');
       }
       return healthy;
     } catch (e) {

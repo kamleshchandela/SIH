@@ -1,6 +1,6 @@
 # 08 — Statutory Reports: CSV & PDF Generation Pipeline
 
-> **Technical specification for the generation, digital authentication, and export of statutory inspection artifacts (RFC 4180 CSV Audit Logs & Official Directorate Legal Metrology Notices in PDF) within Themis Mobile.**
+> **Technical specification for the generation, digital authentication, and export of statutory inspection artifacts (RFC 4180 CSV Audit Logs & Official Directorate Legal Metrology Notices in PDF) within PARAKH Mobile.**
 
 ---
 
@@ -8,7 +8,7 @@
 
 Under the **Legal Metrology Act, 2009**, read with the **Legal Metrology (Packaged Commodities) Rules, 2011** and the **Jan Vishwas (Amendment of Provisions) Act, 2023**, field enforcement inspections must produce tamper-evident, auditable documentation that can be submitted as electronic evidence under **Section 65B of the Indian Evidence Act, 1872**.
 
-Themis Mobile generates two primary statutory artifacts immediately upon completion of an audit:
+PARAKH Mobile generates two primary statutory artifacts immediately upon completion of an audit:
 1. **Statutory CSV Audit Spreadsheet** (`statutory_audit_<INSPECTION_ID>.csv`): An RFC 4180-compliant tabular dataset recording every individual packaging declaration evaluation, source panel image, matched OCR token, and legal remarks.
 2. **Official Statutory Notice / Certificate of Compliance (PDF)** (`statutory_notice_<INSPECTION_ID>.pdf`): A print-ready, officially formatted legal show-cause notice issued under Section 36(1) with government headers, statutory compounding schedule, and digital authentication seal.
 

@@ -1,4 +1,4 @@
-# 04 — Themis System Architecture & Pipeline Specification
+# 04 — PARAKH System Architecture & Pipeline Specification
 
 ## 1. System High-Level Topology
 
@@ -10,7 +10,7 @@
                                   │
                                   ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│              Themis Engine Core (High-Performance Rust)                 │
+│              PARAKH Engine Core (High-Performance Rust)                 │
 │                                                                         │
 │  ┌───────────────────────────────────────────────────────────────────┐  │
 │  │ 1. Vision & OCR Ingestion Subsystem (ort on CPU)                  │  │
@@ -137,7 +137,7 @@ When exposing this in the upcoming UI, the frontend settings modal should presen
 
 ## 6. Native Rust Batch Scanning Engine (`src/batch.rs`)
 
-To achieve maximum throughput with zero interpreter overhead, Themis embeds the batch inspection orchestrator directly inside the native binary:
+To achieve maximum throughput with zero interpreter overhead, PARAKH embeds the batch inspection orchestrator directly inside the native binary:
 
 ### 1. Architectural Components
 - **SKU Directory Discoverer (`discover_product_skus`):** Recursively groups panel images (`front.jpg`, `panel_raw_1.jpg`, `panel_raw_2.jpg`, `panel_raw_3.jpg`) into distinct product entities (`TargetSku`).
@@ -182,7 +182,7 @@ let risk_tier = if violations_count == 0 {
 
 ## 8. Line-Quantized Total-Order Text Sorting (`src/ocr/detector.rs`)
 
-To eliminate slice sorting panics caused by non-transitive bounding box comparisons across non-standard packaging layouts, Themis implements a line-quantized strict total order:
+To eliminate slice sorting panics caused by non-transitive bounding box comparisons across non-standard packaging layouts, PARAKH implements a line-quantized strict total order:
 
 ```rust
 // Sort top-to-bottom, left-to-right reading order using a strict total order
