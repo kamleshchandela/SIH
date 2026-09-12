@@ -9,11 +9,11 @@ use std::sync::LazyLock;
 // sides are word chars. The optional tail requires a digit inside, so
 // plain words ("420grams") still reject. (No lookahead: the regex crate
 // doesn't support it.)
-static RE_NET_QTY: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)(?:(?:net\s*(?:wt\.?|weight|qty\.?|quantity|content[s]?|vol\.?|volume|weicm)?|netwt|netqty|netquantity|netweight|netweicm|quantity|qty|vol|volume)\s*[:.]?\s*(?:[\s\S]{0,35}?[:.]?\s*)?)(\d+(?:\.\d+)?)\s*(kg|g|gm|gms|ml|l|ltr|ltrs|n|u|units|m)(?:[A-Za-z.]*\d[A-Za-z0-9.]*)?\b").unwrap()
+pub(crate) static RE_NET_QTY: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)(?:(?:net\s*(?:wt\.?|weight|we[i]?ght|qty\.?|quantity|content[s]?|vol\.?|volume|weicm)?|netwt|netweght|netqty|netquantity|netweight|netweicm|quantity|qty|vol|volume)\s*[:.]?\s*(?:[\s\S]{0,35}?[:.]?\s*)?)(\d+(?:\.\d+)?)\s*(kg|g|gm|gms|ml|l|ltr|ltrs|n|u|units|m)(?:[A-Za-z.]*\d[A-Za-z0-9.]*)?\b").unwrap()
 });
 
-static RE_STANDALONE_QTY: LazyLock<Regex> = LazyLock::new(|| {
+pub(crate) static RE_STANDALONE_QTY: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)\b(\d+(?:\.\d+)?)\s*(kg|g|gm|ml|l|ltr|m)(?:[A-Za-z.]*\d[A-Za-z0-9.]*)?\b").unwrap()
 });
 
@@ -21,43 +21,47 @@ static RE_ILLEGAL_UNITS: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)\b(\d+(?:\.\d+)?)\s*(gms?|gm|ml\.|kgs?\.?|ltrs?\.?)\b").unwrap()
 });
 
-static RE_MRP: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)(?:m\.?r\.?p\.?[rte]?|mrp\s*[rte]|max(?:imum)?\s*retail\s*price|maxretailprice)\s*[:.]?\s*(?:rs\.?|inr|₹|r|t|e)?\s*(?:[\s\S]{0,60}?[:.]?\s*(?:rs\.?|inr|₹|r|t|e)?\s*)?(\d{1,5}\.\d{2}|\b\d{2,5}\b)|(?:rs\.?|₹)\s*(\d{1,5}(?:\.\d{1,2})?)").unwrap()
+pub(crate) static RE_MRP: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)(?:m\.?r\.?p\.?[a-z]{0,3}|mrp\s*[rte]|max(?:imum)?\s*retail\s*price|maxretailprice)\s*[:.]?\s*(?:rs\.?|inr|₹|r|t|e)?\s*(?:[\s\S]{0,60}?[:.]?\s*(?:rs\.?|inr|₹|r|t|e)?\s*)?(\d{1,5}\.\d{2}|\b\d{2,5}\b)|(?:rs\.?|₹)\s*(\d{1,5}(?:\.\d{1,2})?)").unwrap()
 });
 
 static RE_TAX_INCL: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)(?:(?:incl[a-z.]*|cinci|indl?|inclusive)\s*(?:of)?[\s\S]{0,120}?all\s*taxes|inclusive\s*of\s*all\s*taxes|incl\.?ofalltaxes|incl\.?alltaxes|inclofalltaxes|indl?\s*(?:of)?[\s\S]{0,120}?all\s*taxes|(?:incl|inclusive)[\s\S]{0,80}?taxes|\ball\s*taxes\b)").unwrap()
 });
 
-static RE_MFG_DATE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)(?:mfg\.?|mfd\.?|pkd\.?|packed|manufactured|mfgdate|pkddate|mfdon|mid|mic|mio|pkd[.\s/]*(?:l?use)?(?:by)?|use\s*by)\s*(?:on\s*)?[:.]?\s*(?:date\s*[:.]?)?\s*(\d{1,2}[\s/-]*[A-Za-z]{3,9}\.?[\s/-]*\d{2,4}|(?:\d{1,2}[\s/-]*)?(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|j0l|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?[/-]?\s*\d{2,4}|(?:0[1-9]|1[0-2]|[o0][1-9d]|1[o0-2])\s*[/-]\s*(?:20\d{2}|19\d{2}|\d{2})|(\d{1,2}(?:[A-Za-z]{3}|J0L|AP8)\d{2})\d{1,3}(?:[A-Za-z]{3}|J0L|AP8)[A-Za-z0-9]*|\d{1,2}(?:[A-Za-z]{3}|J0L|AP8)\d{2,4})").unwrap()
+pub(crate) static RE_MFG_DATE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)(?:mfg\.?|mfd\.?|pkd\.?|packed|manufactured|mfgdate|pkddate|mfdon|mid|mic|mio|pkd[.\s/]*(?:l?use)?(?:by)?|use\s*by)\s*(?:on\s*)?[:.]?\s*(?:date\s*[:.]?)?\s*(\d{1,2}[\s/-]*[A-Za-z]{3,9}\.?[\s/-]*\d{2,4}|(?:\d{1,2}[\s/-]*)?(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|j0l|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?[/-]?\s*\d{2,4}|(?:0[1-9]|1[0-2]|[o0][1-9d]|1[o0-2])\s*[/-]\s*(?:20\d{2}|19\d{2}|\d{2})|(?:0?[1-9]|[12][0-9]|3[01])[./-](?:0?[1-9]|1[0-2])[./-](?:20\d{2}|19\d{2}|\d{2})|(\d{1,2}(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|J0L|AUG|SEP|OCT|NOV|DEC|AP8)\d{2})\d{1,3}(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|J0L|AUG|SEP|OCT|NOV|DEC|AP8)[A-Za-z0-9]*|\d{1,2}(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|J0L|AUG|SEP|OCT|NOV|DEC|AP8)\d{2,4})").unwrap()
 });
 
 // Glued-date alternative: MFD and USEBY in one token ("17JUL26712APR2").
 // Ordered BEFORE the general run so group 2 captures the 2-digit-year
 // first date ("17JUL26", not year 2671). Code reads get(2).or(get(1)).
 // (Consumes the tail instead of a lookahead: unsupported by this crate.)
+pub(crate) // Dotted day-first dates first: DD.MM.YYYY is the common Indian stamp
+// ("22.05.2026") and neither the month-word nor the MM/YYYY alternatives
+// accept dots. Year needs 2+ digits so versions ("2.0") and decimals
+// ("0.44") can't match; month 01-12 keeps "1.25%"-style values out.
 static RE_STANDALONE_DATE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)\b(\d{1,2}[\s/-]*(?:jan|feb|mar|apr|may|jun|jul|j0l|aug|sep|oct|nov|dec)[a-z]*\.?[\s/-]*\d{2,4}\b|(\d{1,2}(?:[A-Za-z]{3}|J0L|AP8)\d{2})\d{1,3}(?:[A-Za-z]{3}|J0L|AP8)[A-Za-z0-9]*|\d{1,2}(?:[A-Za-z]{3}|J0L|AP8)\d{2,4}\b|(?:0[1-9]|1[0-2]|[o0][1-9d]|1[o0-2])\s*[/-]\s*(?:20\d{2}|19\d{2}|\d{2})\b)").unwrap()
+    Regex::new(r"(?i)\b((?:0?[1-9]|[12][0-9]|3[01])[./-](?:0?[1-9]|1[0-2])[./-](?:20\d{2}|19\d{2}|\d{2})\b|\d{1,2}[\s/-]*(?:jan|feb|mar|apr|may|jun|jul|j0l|aug|sep|oct|nov|dec)[a-z]*\.?[\s/-]*\d{2,4}\b|(\d{1,2}(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|J0L|AUG|SEP|OCT|NOV|DEC|AP8)\d{2})\d{1,3}(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|J0L|AUG|SEP|OCT|NOV|DEC|AP8)[A-Za-z0-9]*|\d{1,2}(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|J0L|AUG|SEP|OCT|NOV|DEC|AP8)\d{2,4}\b|(?:0[1-9]|1[0-2]|[o0][1-9d]|1[o0-2])\s*[/-]\s*(?:20\d{2}|19\d{2}|\d{2})\b)").unwrap()
 });
 
 static RE_COUNTRY_ORIGIN: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)(?:country\s*of\s*origin|made\s*in|product\s*of|madeinindia|productofindia)\s*[:.]?\s*([a-zA-Z\s]+)?").unwrap()
 });
 
-static RE_EMAIL: LazyLock<Regex> = LazyLock::new(|| {
+pub(crate) static RE_EMAIL: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+").unwrap()
 });
 
-static RE_PHONE: LazyLock<Regex> = LazyLock::new(|| {
+pub(crate) static RE_PHONE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)(?:^|[^\d+])(?:1800[-\s]?[0-9mMnNoOzZ]{3}[-\s]?[0-9mMnNoOzZ]{3,4}|(?:\+9[0-9]?|0)?\s*[6-9]\d{2,4}[-\s]?\d{2,4}[-\s]?\d{2,4}|\d{3,4}[-\s]\d{6,8})\b").unwrap()
 });
 
-static RE_PINCODE: LazyLock<Regex> = LazyLock::new(|| {
+pub(crate) static RE_PINCODE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"\b[1-9][0-9]{2}\s?[0-9]{3}\b").unwrap()
 });
 
-static RE_MFG_KEYWORDS: LazyLock<Regex> = LazyLock::new(|| {
+pub(crate) static RE_MFG_KEYWORDS: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)(?:mfg|manufactured|marketed|packed|imported|regd\.?\s*office|industrial\s*area|plot\s*no\.?|pvt\.?\s*ltd\.?|private\s*limited|ltd\.?|limited)\s*(?:by|at|for)?|manufacturedby|marketedby|regdoffice|industrialarea|plotno").unwrap()
 });
 
@@ -71,6 +75,41 @@ static RE_UNIT_SALE_PRICE: LazyLock<Regex> = LazyLock::new(|| {
 fn safe_window(text: &str, end: usize, back: usize) -> &str {
     let s = text.floor_char_boundary(end.saturating_sub(back));
     &text[s..end]
+}
+
+/// Runs of 8+ consecutive digits are EAN/GTIN barcodes (or batch serials),
+/// never quantity/date/price values. Seen live: "89017251005955 l" reported
+/// as a 14-digit net quantity on a close-up half with no better candidate.
+static RE_DIGIT_RUN: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\d{8,}").unwrap());
+
+/// True when the candidate value (or its host token) is barcode ballast.
+pub(crate) fn is_barcode_ballast(val: &str, host: &str) -> bool {
+    val.len() >= 8 && val.chars().all(|c| c.is_ascii_digit())
+        || RE_DIGIT_RUN.is_match(host)
+}
+
+/// True when text looks like a nutrition facts table (2+ macro keywords).
+/// Used by the guided quantity-step validator: a nutrition-only close-up is
+/// the right *kind* of photo even when the net-weight print isn't in frame.
+pub(crate) fn has_nutrition_table(text: &str) -> bool {
+    const KEYS: [&str; 13] = [
+        "carbohydrate",
+        "sugar",
+        "fat",
+        "protein",
+        "sodium",
+        "energy",
+        "serve",
+        "serving",
+        "kcal",
+        "kj",
+        "cholesterol",
+        "saturate",
+        "transfat",
+    ];
+    let low = text.to_lowercase();
+    KEYS.iter().filter(|k| low.contains(**k)).count() >= 2
 }
 
 /// Count nutrition-table keywords in a context window (capped). Used to
@@ -109,6 +148,9 @@ fn find_net_qty_candidate(combined_text: &str) -> Option<(String, String)> {
         let val_str = caps.get(1).map(|m| m.as_str()).unwrap_or("");
         let unit_raw = caps.get(2).map(|m| m.as_str()).unwrap_or("");
         if val_str.is_empty() || unit_raw.is_empty() {
+            continue;
+        }
+        if is_barcode_ballast(val_str, val_str) {
             continue;
         }
         let val_start = caps.get(1).map(|m| m.start()).unwrap_or(m.start());
@@ -356,6 +398,9 @@ pub fn evaluate_compliance_with_quality(
                 .join(" ");
             let val_str = caps.get(1).map(|m| m.as_str()).unwrap_or("");
             let unit_raw = caps.get(2).map(|m| m.as_str()).unwrap_or("");
+            if is_barcode_ballast(val_str, &t.text) {
+                continue;
+            }
             let mut unit_str = unit_raw.to_lowercase();
             if unit_str == "m" {
                 unit_str = "ml".to_string();
@@ -404,6 +449,9 @@ pub fn evaluate_compliance_with_quality(
                         if (dx < 140 && dy < 800) || (dy < 80 && dx < 600) {
                             if let Some(caps) = RE_STANDALONE_QTY.captures(&t_val.text) {
                                 let v = caps.get(1).map(|m| m.as_str()).unwrap_or("");
+                                if is_barcode_ballast(v, &t_val.text) {
+                                    continue;
+                                }
                                 let u_raw = caps.get(2).map(|m| m.as_str()).unwrap_or("");
                                 let u = if u_raw.eq_ignore_ascii_case("m") { "ml" } else { u_raw };
                                 detected_qty = Some((v.to_string(), u.to_string()));
@@ -1150,6 +1198,7 @@ pub fn evaluate_compliance_with_quality(
         },
         panel_qualities,
         tamper_analysis: None,
+        capture_mode: "one-shot".to_string(),
         raw_ocr_tokens: tokens.to_vec(),
     }
 }

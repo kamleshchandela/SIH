@@ -159,6 +159,48 @@ class ThemisApiService {
     }
   }
 
+  /// Guided capture: submit one step's photos (native only — the server has
+  /// no guided endpoints). Returns {step, valid, tokens}.
+  Future<Map<String, dynamic>> submitGuidedStep({
+    required String stepId,
+    required List<String> imagePaths,
+  }) async {
+    if (!ThemisNativeBridge.instance.isSupportedPlatform) {
+      throw Exception('Guided capture requires the on-device engine.');
+    }
+    DevLogger.instance.info('GUIDED', 'Submitting $stepId (${imagePaths.length} photo(s))...');
+    return ThemisNativeBridge.instance.submitGuidedStep(
+      stepId: stepId,
+      imagePaths: imagePaths,
+      modelOption: _modelOption,
+    );
+  }
+
+  /// Guided capture: merge cached steps into a session report and save it.
+  /// Returns {report, step_validity}.
+  Future<({ComplianceReport report, Map<String, dynamic> validity})> finalizeGuidedSession({
+    String? productName,
+  }) async {
+    if (!ThemisNativeBridge.instance.isSupportedPlatform) {
+      throw Exception('Guided capture requires the on-device engine.');
+    }
+    final parsed = await ThemisNativeBridge.instance.finalizeGuidedSession(
+      productName: productName,
+    );
+    final report = ComplianceReport.fromJson(parsed);
+    await AuditStorageService.instance.saveInspection(report);
+    DevLogger.instance.success(
+      'GUIDED',
+      'Session complete: ${report.complianceScorePct.toStringAsFixed(1)}% (${report.riskTier})',
+    );
+    final validity = Map<String, dynamic>.from(parsed['step_validity'] as Map? ?? {});
+    return (report: report, validity: validity);
+  }
+
+  Future<void> resetGuidedSession() {
+    return ThemisNativeBridge.instance.resetGuidedSession();
+  }
+
   Future<ComplianceReport> scanSinglePanel(String imagePath) async {
     if (_modelOption == EngineModelOption.mobileCompactInt8 ||
         _modelOption == EngineModelOption.mobileAccurateInt8) {

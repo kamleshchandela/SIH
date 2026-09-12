@@ -58,7 +58,7 @@ pub struct RequirementEvaluation {
 }
 
 /// Normalized 2D bounding box
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BoundingBox {
     pub x: u32,
     pub y: u32,
@@ -133,7 +133,15 @@ pub struct ComplianceReport {
     pub panel_qualities: Vec<super::quality::PanelImageQuality>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tamper_analysis: Option<TamperAnalysis>,
+    /// Which flow produced this report: "one-shot" (pooled panels) or
+    /// "guided" (forced 4-step session). Defaults for old payloads.
+    #[serde(default = "default_capture_mode")]
+    pub capture_mode: String,
     pub raw_ocr_tokens: Vec<OcrToken>,
+}
+
+fn default_capture_mode() -> String {
+    "one-shot".to_string()
 }
 
 /// Physical forensic visual tampering assessment (Dual-MRP, secondary adhesive stickers)

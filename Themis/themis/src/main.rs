@@ -67,6 +67,11 @@ struct Cli {
     #[arg(short, long, num_args = 1..)]
     scan: Option<Vec<PathBuf>>,
 
+    /// Guided session: repeatable STEP=PATH pairs (steps: quantity, price,
+    /// date, back; PATH may be `skip`). Merges per-step evaluations.
+    #[arg(long, num_args = 1..)]
+    guided_session: Option<Vec<String>>,
+
     /// Scan an entire product directory, pooling all packaging panel images
     #[arg(long)]
     scan_product: Option<PathBuf>,
@@ -156,6 +161,51 @@ async fn main() -> Result<()> {
 
     // Initialize OCR pipeline on CPU
     let ocr = OcrPipeline::new_with_tier(&models_dir, cli.model_tier.as_deref())?;
+
+    // Guided session mode: STEP=PATH pairs merged into one session report.
+    if let Some(specs) = cli.guided_session {
+        use compliance::guided::{merge_guided_session, validate_step_capture, GuidedStep, GuidedStepInput};
+        let mut steps = Vec::new();
+        for spec in &specs {
+            let (step_id, path) = spec.split_once('=').unwrap_or(("", spec.as_str()));
+            let Some(gstep) = GuidedStep::from_id(step_id) else {
+                eprintln!("\x1b[91m[!] Unknown guided step '{step_id}' (want quantity|price|date|back)\x1b[0m");
+                return Ok(());
+            };
+            if path.eq_ignore_ascii_case("skip") {
+                steps.push(GuidedStepInput { step: gstep, tokens: vec![], panel_names: vec![], skipped: true });
+                continue;
+            }
+            let p = PathBuf::from(path);
+            let (tokens, fname, _quality) = themis::ffi::scan_photo_cached(&ocr, &p.to_string_lossy())?;
+            let valid = validate_step_capture(gstep, &tokens);
+            println!("Step {:<8} {:<28} tokens={:<4} valid={}", gstep.id(), fname, tokens.len(), valid);
+            if !valid {
+                eprintln!("\x1b[93m[!] Step '{}' capture rejected (wrong photo?) — merged anyway; retake recommended\x1b[0m", gstep.id());
+            }
+            steps.push(GuidedStepInput { step: gstep, tokens, panel_names: vec![p.to_string_lossy().to_string()], skipped: false });
+        }
+        let report = merge_guided_session(None, steps, vec![]);
+        if cli.json {
+            println!("{}", serde_json::to_string_pretty(&report)?);
+            return Ok(());
+        }
+        println!("\n{}", "=".repeat(75));
+        println!("       GUIDED SESSION REPORT (mode: {})", report.capture_mode);
+        println!("{}", "=".repeat(75));
+        println!("Inspection ID : {}", report.inspection_id);
+        println!("Score         : {:.1}%  ({:?})", report.compliance_score_pct, report.risk_tier);
+        for eval in &report.evaluations {
+            let icon = match eval.status {
+                compliance::Status::Compliant => "✅ PASS",
+                compliance::Status::Warning => "⚠️ WARN",
+                compliance::Status::Violation => "❌ FAIL",
+                compliance::Status::NotApplicable => "➖ N/A",
+            };
+            println!("{icon} | {:<20} | {}", format!("{:?}", eval.field), eval.detected_text.as_deref().unwrap_or("-"));
+        }
+        return Ok(());
+    }
 
     // Determine images to scan for CLI mode
     let mut images_to_scan: Vec<PathBuf> = Vec::new();

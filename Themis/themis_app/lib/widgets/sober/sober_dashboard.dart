@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../services/audit_storage_service.dart';
+import '../../services/glass_perf_service.dart';
 import '../../services/themis_api.dart';
 import '../../theme/sober_theme.dart';
 
@@ -222,31 +223,40 @@ class _SoberDashboardState extends State<SoberDashboard> {
         ),
         const SizedBox(height: 18),
 
-        // --- Mini scan actions ---
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _MiniAction(
-              icon: CupertinoIcons.camera_fill,
-              label: 'SCAN',
-              onTap: widget.onCamera,
-            ),
-            _MiniAction(
-              icon: CupertinoIcons.folder_fill,
-              label: 'FILES',
-              onTap: widget.onBrowseFiles,
-            ),
-            _MiniAction(
-              icon: CupertinoIcons.square_stack_3d_up_fill,
-              label: 'MULTI',
-              onTap: widget.onMultiPanel,
-            ),
-            _MiniAction(
-              icon: CupertinoIcons.sparkles,
-              label: 'SAMPLE',
-              onTap: widget.onLoadDishwash ?? widget.onSample,
-            ),
-          ],
+        // --- Mini scan actions (one-shot bypass surface: hidden until the
+        // Inspector quick scan unlock in Engine settings) ---
+        ListenableBuilder(
+          listenable: GlassPerfService.instance,
+          builder: (context, _) {
+            if (!GlassPerfService.instance.oneShotUnlocked) {
+              return const SizedBox.shrink();
+            }
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _MiniAction(
+                  icon: CupertinoIcons.camera_fill,
+                  label: 'SCAN',
+                  onTap: widget.onCamera,
+                ),
+                _MiniAction(
+                  icon: CupertinoIcons.folder_fill,
+                  label: 'FILES',
+                  onTap: widget.onBrowseFiles,
+                ),
+                _MiniAction(
+                  icon: CupertinoIcons.square_stack_3d_up_fill,
+                  label: 'MULTI',
+                  onTap: widget.onMultiPanel,
+                ),
+                _MiniAction(
+                  icon: CupertinoIcons.sparkles,
+                  label: 'SAMPLE',
+                  onTap: widget.onLoadDishwash ?? widget.onSample,
+                ),
+              ],
+            );
+          },
         ),
       ],
     );

@@ -216,6 +216,7 @@ pub async fn get_inspection_by_id(pool: &PgPool, inspection_id: &str) -> Result<
             violations,
             panel_qualities: Vec::new(),
             tamper_analysis: None,
+            capture_mode: "one-shot".to_string(),
             raw_ocr_tokens,
         }))
     } else {

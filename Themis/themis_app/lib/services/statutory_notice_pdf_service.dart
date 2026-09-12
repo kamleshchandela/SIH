@@ -118,16 +118,17 @@ class StatutoryNoticePdfService {
 
     stream.writeln('0.2 0.3 0.5 rg');
     stream.writeln('40 622 515 15 re f');
+    // NOTE: Tm (absolute) — chained Td drifts relative and pushes every
+    // column after the first off-page (the old "empty columns" bug).
     stream.writeln('BT');
     stream.writeln('1 1 1 rg');
     stream.writeln('/F2 8 Tf');
-    stream.writeln('45 626 Td (Status) Tj');
-    stream.writeln('85 626 Td (Mandated Field) Tj');
-    stream.writeln('200 626 Td (Statutory Clause) Tj');
-    stream.writeln('350 626 Td (Detected Value / Remarks) Tj');
+    stream.writeln('1 0 0 1 45 626 Tm (Status) Tj');
+    stream.writeln('1 0 0 1 85 626 Tm (Mandated Field) Tj');
+    stream.writeln('1 0 0 1 220 626 Tm (Statutory Rule) Tj');
     stream.writeln('ET');
 
-    // Evaluation rows
+    // Evaluation rows (two lines each: status/field/rule + found value)
     double curY = 605.0;
     for (final eval in report.evaluations) {
       if (curY < 210.0) break; // Keep on single high-density summary page
@@ -149,18 +150,23 @@ class StatutoryNoticePdfService {
       }
 
       final fName = _sanitizePdf(_truncate(eval.field, 22));
-      final clause = _sanitizePdf(_truncate(eval.clause, 28));
-      final remarks = _sanitizePdf(_truncate(eval.remarks, 46));
+      // Full rule reference: clause is "Rule 6(1)(c) & Rule 13 — <title>".
+      // The old 28-char cut mangled it mid-word, so the rule rides uncut.
+      final ruleRef = _sanitizePdf(eval.clause.split(' — ').first);
+      final foundSrc = (eval.detectedText?.isNotEmpty == true)
+          ? eval.detectedText!
+          : eval.remarks;
+      final found = _sanitizePdf(_truncate(foundSrc, 100));
 
       stream.writeln('BT');
-      stream.writeln('$stColor rg /F2 8 Tf 45 ${curY.toStringAsFixed(1)} Td ($stBadge) Tj');
-      stream.writeln('0.1 0.1 0.1 rg /F2 8 Tf 85 ${curY.toStringAsFixed(1)} Td ($fName) Tj');
-      stream.writeln('0.3 0.3 0.3 rg /F1 7 Tf 200 ${curY.toStringAsFixed(1)} Td ($clause) Tj');
-      stream.writeln('0.2 0.2 0.2 rg /F1 7.5 Tf 350 ${curY.toStringAsFixed(1)} Td ($remarks) Tj');
+      stream.writeln('$stColor rg /F2 8 Tf 1 0 0 1 45 ${curY.toStringAsFixed(1)} Tm ($stBadge) Tj');
+      stream.writeln('0.1 0.1 0.1 rg /F2 8 Tf 1 0 0 1 85 ${curY.toStringAsFixed(1)} Tm ($fName) Tj');
+      stream.writeln('0.15 0.15 0.45 rg /F2 8 Tf 1 0 0 1 220 ${curY.toStringAsFixed(1)} Tm ($ruleRef) Tj');
+      stream.writeln('0.35 0.35 0.35 rg /F1 7.5 Tf 1 0 0 1 85 ${(curY - 11.0).toStringAsFixed(1)} Tm (Found: $found) Tj');
       stream.writeln('ET');
 
-      stream.writeln('0.9 0.9 0.9 rg 40 ${(curY - 3.0).toStringAsFixed(1)} 515 0.5 re f');
-      curY -= 16.0;
+      stream.writeln('0.9 0.9 0.9 rg 40 ${(curY - 14.0).toStringAsFixed(1)} 515 0.5 re f');
+      curY -= 27.0;
     }
 
     // 3. Image Forensics Quality Gate Box

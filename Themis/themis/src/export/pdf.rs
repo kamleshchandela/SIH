@@ -54,13 +54,15 @@ pub fn generate_statutory_notice_pdf(report: &ComplianceReport) -> Vec<u8> {
     // 2. Rule Evaluation Table
     stream.push_str("BT\n0.1 0.2 0.4 rg\n/F2 10 Tf\n40 640 Td\n(RULE-BY-RULE STATUTORY DECLARATION AUDIT) Tj\nET\n");
 
-    // Table Header
+    // Table Header (Tm = absolute positioning; chained Td drifts relative
+    // and pushes every column after the first off-page — the old layout's
+    // "empty columns" bug).
     stream.push_str("0.2 0.3 0.5 rg\n40 622 515 15 re f\n");
-    stream.push_str("BT\n1 1 1 rg\n/F2 8 Tf\n45 626 Td\n(Status) Tj\n85 626 Td\n(Mandated Field) Tj\n200 626 Td\n(Statutory Clause) Tj\n350 626 Td\n(Detected Value / Remarks) Tj\nET\n");
+    stream.push_str("BT\n1 1 1 rg\n/F2 8 Tf\n1 0 0 1 45 626 Tm\n(Status) Tj\n1 0 0 1 85 626 Tm\n(Mandated Field) Tj\n1 0 0 1 220 626 Tm\n(Statutory Rule) Tj\nET\n");
 
     let mut cur_y = 605.0f32;
     for eval in &report.evaluations {
-        if cur_y < 200.0 {
+        if cur_y < 210.0 {
             break; // Fit on single high-density summary page
         }
 
@@ -72,17 +74,29 @@ pub fn generate_statutory_notice_pdf(report: &ComplianceReport) -> Vec<u8> {
         };
 
         let field_name = sanitize_pdf_string(&format!("{:?}", eval.field));
-        let clause = sanitize_pdf_string(&eval.legal_clause[..28.min(eval.legal_clause.len())]);
-        let remarks = sanitize_pdf_string(&eval.remarks[..48.min(eval.remarks.len())]);
+        // Full rule reference: legal_clause is "Rule 6(1)(c) & Rule 13 — <title>".
+        // The old 28-char cut mangled it mid-word ("Rule 6(1)(c) & Rule 13 ? Net"),
+        // so rows now carry the rule on its own line, uncut.
+        let rule_ref = sanitize_pdf_string(
+            eval.legal_clause
+                .split(" — ")
+                .next()
+                .unwrap_or(&eval.legal_clause),
+        );
+        // Line 2: what was actually found (or why not), uncut to 100 chars.
+        // floor_char_boundary: byte-slicing mid-₹ would panic.
+        let found = eval.detected_text.as_deref().unwrap_or(&eval.remarks);
+        let cut = found.floor_char_boundary(100.min(found.len()));
+        let found_line = sanitize_pdf_string(&found[..cut]);
 
         // Row background alternating
         stream.push_str(&format!(
-            "BT\n{} rg\n/F2 8 Tf\n45 {:.1} Td\n({}) Tj\n0.1 0.1 0.1 rg\n/F2 8 Tf\n85 {:.1} Td\n({}) Tj\n0.3 0.3 0.3 rg\n/F1 7 Tf\n200 {:.1} Td\n({}) Tj\n0.2 0.2 0.2 rg\n/F1 7.5 Tf\n350 {:.1} Td\n({}) Tj\nET\n",
-            st_color, cur_y, st_badge, cur_y, field_name, cur_y, clause, cur_y, remarks
+            "BT\n{} rg\n/F2 8 Tf\n1 0 0 1 45 {:.1} Tm\n({}) Tj\n0.1 0.1 0.1 rg\n/F2 8 Tf\n1 0 0 1 85 {:.1} Tm\n({}) Tj\n0.15 0.15 0.45 rg\n/F2 8 Tf\n1 0 0 1 220 {:.1} Tm\n({}) Tj\n0.35 0.35 0.35 rg\n/F1 7.5 Tf\n1 0 0 1 85 {:.1} Tm\n(Found: {}) Tj\nET\n",
+            st_color, cur_y, st_badge, cur_y, field_name, cur_y, rule_ref, cur_y - 11.0, found_line
         ));
-        stream.push_str(&format!("0.9 0.9 0.9 rg\n40 {:.1} 515 0.5 re f\n", cur_y - 3.0));
+        stream.push_str(&format!("0.9 0.9 0.9 rg\n40 {:.1} 515 0.5 re f\n", cur_y - 14.0));
 
-        cur_y -= 16.0;
+        cur_y -= 27.0;
     }
 
     // 3. Laplacian Blur Image Sharpness Gate Box
@@ -98,10 +112,11 @@ pub fn generate_statutory_notice_pdf(report: &ComplianceReport) -> Vec<u8> {
             let quality_color = if q.is_blurry { "0.85 0.1 0.1" } else { "0.0 0.5 0.2" };
             let quality_tag = if q.is_blurry { "CAMERA BLUR DETECTED" } else { "SHARP (LEGIBLE)" };
             let safe_pname = sanitize_pdf_string(&q.panel_name);
-            let safe_assessment = sanitize_pdf_string(&q.assessment[..60.min(q.assessment.len())]);
+            let acut = q.assessment.floor_char_boundary(60.min(q.assessment.len()));
+            let safe_assessment = sanitize_pdf_string(&q.assessment[..acut]);
 
             stream.push_str(&format!(
-                "BT\n0.1 0.1 0.1 rg\n/F2 7.5 Tf\n45 {:.1} Td\n(Panel: {}) Tj\n{} rg\n/F2 7.5 Tf\n180 {:.1} Td\n([{} - Var: {:.1}]) Tj\n0.3 0.3 0.3 rg\n/F1 7.5 Tf\n330 {:.1} Td\n({}) Tj\nET\n",
+                "BT\n0.1 0.1 0.1 rg\n/F2 7.5 Tf\n1 0 0 1 45 {:.1} Tm\n(Panel: {}) Tj\n{} rg\n/F2 7.5 Tf\n1 0 0 1 180 {:.1} Tm\n([{} - Var: {:.1}]) Tj\n0.3 0.3 0.3 rg\n/F1 7.5 Tf\n1 0 0 1 330 {:.1} Tm\n({}) Tj\nET\n",
                 cur_y, safe_pname, quality_color, cur_y, quality_tag, q.laplacian_variance, cur_y, safe_assessment
             ));
             cur_y -= 13.0;

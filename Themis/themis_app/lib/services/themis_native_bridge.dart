@@ -29,6 +29,25 @@ typedef _ThemisScanSkuDart = Pointer<Utf8> Function(
 typedef _ThemisFreeStringC = Void Function(Pointer<Utf8> ptr);
 typedef _ThemisFreeStringDart = void Function(Pointer<Utf8> ptr);
 
+typedef _ThemisGuidedSubmitC = Pointer<Utf8> Function(
+  Pointer<Utf8> modelsDir,
+  Pointer<Utf8> tier,
+  Pointer<Utf8> stepId,
+  Pointer<Utf8> imagesJson,
+);
+typedef _ThemisGuidedSubmitDart = Pointer<Utf8> Function(
+  Pointer<Utf8> modelsDir,
+  Pointer<Utf8> tier,
+  Pointer<Utf8> stepId,
+  Pointer<Utf8> imagesJson,
+);
+
+typedef _ThemisGuidedFinalizeC = Pointer<Utf8> Function(Pointer<Utf8> productName);
+typedef _ThemisGuidedFinalizeDart = Pointer<Utf8> Function(Pointer<Utf8> productName);
+
+typedef _ThemisGuidedResetC = Void Function();
+typedef _ThemisGuidedResetDart = void Function();
+
 /// High-performance FFI bridge to the native embedded Rust compliance engine (`libthemis.so`).
 /// Executes DBNet text detection, PP-OCR text recognition, and Legal Metrology Rule 7 evaluations
 /// on-device with zero Dart garbage collection pauses or thread stalls.
@@ -328,6 +347,180 @@ class ThemisNativeBridge {
       productName: null,
       modelOption: modelOption,
     );
+  }
+
+  /// Submit one guided step's captures: runs inference once, validates the
+  /// capture looks like its step. Returns {step, valid, tokens} (plus error).
+  /// Retakes overwrite the native session cache for that step id.
+  Future<Map<String, dynamic>> submitGuidedStep({
+    required String stepId,
+    required List<String> imagePaths,
+    required EngineModelOption modelOption,
+  }) async {
+    if (_isScanning) {
+      DevLogger.instance.warn('NATIVE', 'Guided submit rejected: another scan is running.');
+      throw StateError('A compliance audit is already running. Please wait for it to complete.');
+    }
+    _isScanning = true;
+    final sw = Stopwatch()..start();
+    try {
+      final modelsDir = await ensureModelsReady();
+      final libPath = _resolveLibraryPath();
+      final tier = (modelOption == EngineModelOption.mobileAccurateInt8)
+          ? 'server-int8'
+          : 'mobile-v3';
+      DevLogger.instance.info('GUIDED', 'Submitting step $stepId (${imagePaths.length} photo(s))...');
+      final jsonResponse = await Isolate.run<String>(() {
+        return _runGuidedSubmitInIsolate(
+          libPath: libPath,
+          modelsDir: modelsDir,
+          tier: tier,
+          stepId: stepId,
+          panelImagePaths: imagePaths,
+        );
+      });
+      final Map<String, dynamic> parsed = jsonDecode(jsonResponse) as Map<String, dynamic>;
+      if (parsed['error'] == true) {
+        throw Exception('Guided step error: ${parsed['message'] ?? 'unknown'}');
+      }
+      DevLogger.instance.info(
+        'GUIDED',
+        'Step $stepId: valid=${parsed['valid']} tokens=${parsed['tokens']} (t=+${sw.elapsedMilliseconds}ms)',
+      );
+      return parsed;
+    } finally {
+      _isScanning = false;
+    }
+  }
+
+  /// Finalize the active guided session (no inference; merges cached steps).
+  /// Returns the raw payload map (report keys + step_validity + stage_timings).
+  Future<Map<String, dynamic>> finalizeGuidedSession({String? productName}) async {
+    if (_isScanning) {
+      DevLogger.instance.warn('NATIVE', 'Guided finalize rejected: another scan is running.');
+      throw StateError('A compliance audit is already running. Please wait for it to complete.');
+    }
+    _isScanning = true;
+    try {
+      final libPath = _resolveLibraryPath();
+      final jsonResponse = await Isolate.run<String>(() {
+        return _runGuidedFinalizeInIsolate(libPath: libPath, productName: productName);
+      });
+      final Map<String, dynamic> parsed = jsonDecode(jsonResponse) as Map<String, dynamic>;
+      if (parsed['error'] == true) {
+        throw Exception('Guided finalize error: ${parsed['message'] ?? 'unknown'}');
+      }
+      final report = ComplianceReport.fromJson(parsed);
+      DevLogger.instance.info(
+        'TIMER',
+        'Guided session merged: ${report.complianceScorePct.toStringAsFixed(1)}% (${report.riskTier})',
+      );
+      final stageTimings = parsed['stage_timings'];
+      if (stageTimings is List) {
+        for (final t in stageTimings) {
+          DevLogger.instance.info('TIMER', t.toString());
+        }
+      }
+      return parsed;
+    } finally {
+      _isScanning = false;
+    }
+  }
+
+  /// Discard the active guided session cache.
+  Future<void> resetGuidedSession() async {
+    final libPath = _resolveLibraryPath();
+    await Isolate.run<void>(() {
+      if (Platform.isAndroid) {
+        try {
+          DynamicLibrary.open('libc++_shared.so');
+        } catch (_) {}
+      }
+      final lib = DynamicLibrary.open(libPath);
+      final resetFn = lib.lookupFunction<_ThemisGuidedResetC, _ThemisGuidedResetDart>(
+        'themis_guided_session_reset',
+      );
+      resetFn();
+    });
+  }
+
+  /// Isolate payload execution worker
+  static String _runGuidedSubmitInIsolate({
+    required String libPath,
+    required String modelsDir,
+    required String tier,
+    required String stepId,
+    required List<String> panelImagePaths,
+  }) {
+    if (Platform.isAndroid) {
+      try {
+        DynamicLibrary.open('libc++_shared.so');
+      } catch (_) {}
+    }
+    final lib = DynamicLibrary.open(libPath);
+    final submitFn = lib.lookupFunction<_ThemisGuidedSubmitC, _ThemisGuidedSubmitDart>(
+      'themis_guided_step_submit',
+    );
+    final freeFn = lib.lookupFunction<_ThemisFreeStringC, _ThemisFreeStringDart>('themis_free_string');
+
+    final modelsDirPtr = modelsDir.toNativeUtf8();
+    final tierPtr = tier.toNativeUtf8();
+    final stepPtr = stepId.toNativeUtf8();
+    final imagesJsonPtr = jsonEncode(panelImagePaths).toNativeUtf8();
+
+    Pointer<Utf8> resultPtr = nullptr;
+    try {
+      resultPtr = submitFn(modelsDirPtr, tierPtr, stepPtr, imagesJsonPtr);
+      if (resultPtr == nullptr) {
+        return jsonEncode({'error': true, 'message': 'Guided submit returned null'});
+      }
+      return resultPtr.toDartString();
+    } finally {
+      if (resultPtr != nullptr) {
+        freeFn(resultPtr);
+      }
+      calloc.free(modelsDirPtr);
+      calloc.free(tierPtr);
+      calloc.free(stepPtr);
+      calloc.free(imagesJsonPtr);
+    }
+  }
+
+  /// Isolate payload execution worker
+  static String _runGuidedFinalizeInIsolate({
+    required String libPath,
+    required String? productName,
+  }) {
+    if (Platform.isAndroid) {
+      try {
+        DynamicLibrary.open('libc++_shared.so');
+      } catch (_) {}
+    }
+    final lib = DynamicLibrary.open(libPath);
+    final finalizeFn = lib.lookupFunction<_ThemisGuidedFinalizeC, _ThemisGuidedFinalizeDart>(
+      'themis_guided_session_finalize',
+    );
+    final freeFn = lib.lookupFunction<_ThemisFreeStringC, _ThemisFreeStringDart>('themis_free_string');
+
+    final productPtr = (productName != null && productName.trim().isNotEmpty)
+        ? productName.trim().toNativeUtf8()
+        : nullptr;
+
+    Pointer<Utf8> resultPtr = nullptr;
+    try {
+      resultPtr = finalizeFn(productPtr);
+      if (resultPtr == nullptr) {
+        return jsonEncode({'error': true, 'message': 'Guided finalize returned null'});
+      }
+      return resultPtr.toDartString();
+    } finally {
+      if (resultPtr != nullptr) {
+        freeFn(resultPtr);
+      }
+      if (productPtr != nullptr) {
+        calloc.free(productPtr);
+      }
+    }
   }
 
   /// Isolate payload execution worker

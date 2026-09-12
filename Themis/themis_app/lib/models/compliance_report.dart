@@ -67,6 +67,7 @@ class RuleEvaluation {
   final String status;
   final String? sourcePanel;
   final String remarks;
+  final String? detectedText;
 
   RuleEvaluation({
     required this.field,
@@ -74,6 +75,7 @@ class RuleEvaluation {
     required this.status,
     this.sourcePanel,
     required this.remarks,
+    this.detectedText,
   });
 
   factory RuleEvaluation.fromJson(Map<String, dynamic> json) {
@@ -83,6 +85,7 @@ class RuleEvaluation {
       status: json['status'] as String? ?? 'Unknown',
       sourcePanel: json['source_panel'] as String?,
       remarks: json['remarks'] as String? ?? '',
+      detectedText: json['detected_text'] as String?,
     );
   }
 
@@ -93,6 +96,7 @@ class RuleEvaluation {
       'status': status,
       if (sourcePanel != null) 'source_panel': sourcePanel,
       'remarks': remarks,
+      if (detectedText != null) 'detected_text': detectedText,
     };
   }
 
@@ -184,6 +188,7 @@ class ComplianceReport {
   final List<RuleEvaluation> evaluations;
   final ViolationsSummary violations;
   final List<OcrToken> rawOcrTokens;
+  final String captureMode;
 
   ComplianceReport({
     required this.inspectionId,
@@ -196,6 +201,7 @@ class ComplianceReport {
     required this.evaluations,
     required this.violations,
     required this.rawOcrTokens,
+    this.captureMode = 'one-shot',
   });
 
   factory ComplianceReport.fromJson(Map<String, dynamic> json) {
@@ -216,6 +222,7 @@ class ComplianceReport {
               ?.map((e) => OcrToken.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      captureMode: json['capture_mode'] as String? ?? 'one-shot',
     );
   }
 
@@ -231,6 +238,7 @@ class ComplianceReport {
       'evaluations': evaluations.map((e) => e.toJson()).toList(),
       'violations': violations.toJson(),
       'raw_ocr_tokens': rawOcrTokens.map((t) => t.toJson()).toList(),
+      'capture_mode': captureMode,
     };
   }
 

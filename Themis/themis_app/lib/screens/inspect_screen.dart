@@ -23,6 +23,7 @@ import '../widgets/sober/sober_dashboard.dart';
 import '../widgets/sober/sober_spacer.dart';
 import '../widgets/sober/sober_timeline.dart';
 import 'dev_logs_screen.dart';
+import 'guided_screen.dart';
 
 enum ScanTab { singlePanel, multiSku, serverPath }
 
@@ -438,7 +439,10 @@ class _InspectScreenState extends State<InspectScreen> {
                       children: [
                         _buildGlassHeader(),
                         const SizedBox(height: 16),
-                        GlassActionGrid(
+                        // One-shot bypass surface: hidden until the Inspector
+                        // quick scan unlock in Engine settings.
+                        if (GlassPerfService.instance.oneShotUnlocked)
+                          GlassActionGrid(
                           onCameraTap: () {
                             setState(() => _currentTab = ScanTab.singlePanel);
                             _pickSingleImage(ImageSource.camera);
@@ -460,58 +464,123 @@ class _InspectScreenState extends State<InspectScreen> {
               ),
             ),
 
-            // 3-Tab Segmented Control
+            // Guided inspection hero: the primary flow. One-shot controls
+            // live demoted below under "Inspector quick scan".
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                child: _buildSegmentedTabBar(),
-              ),
-            ),
-
-            // Active Tab Inspection Controls (sober-aware accents inside)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 4),
                 child: ListenableBuilder(
                   listenable: GlassPerfService.instance,
-                  builder: (context, _) => GlassContainer(
-                    padding: const EdgeInsets.all(20),
-                    borderRadius: 28,
-                    child: _buildActiveTabContent(),
-                  ),
+                  builder: (context, _) {
+                    final sober = GlassPerfService.instance.soberMode;
+                    final accent = sober ? SoberTheme.accent : GlassTheme.compliantCyan;
+                    return GlassContainer(
+                      padding: const EdgeInsets.all(18),
+                      borderRadius: 24,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const GuidedScreen()),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 46,
+                            height: 46,
+                            decoration: BoxDecoration(
+                              color: accent.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Icon(CupertinoIcons.viewfinder, color: accent, size: 24),
+                          ),
+                          const SizedBox(width: 14),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Guided 4-step inspection',
+                                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                                SizedBox(height: 2),
+                                Text('Quantity · Price · Date · Back panel — verified step by step',
+                                    style: TextStyle(color: GlassTheme.textMuted, fontSize: 12)),
+                              ],
+                            ),
+                          ),
+                          Icon(CupertinoIcons.chevron_right, color: accent),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
 
-            if (_isLoading)
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 6),
-                  child: Center(
-                    child: Text(
-                      'Multi-threaded ONNX DBNet text detection & Jan Vishwas statutory analysis in progress...',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: GlassTheme.textMuted, fontSize: 11, height: 1.4),
-                    ),
+            // Inspector quick scan (one-shot, demoted): hidden until unlocked
+            // in Engine settings behind the warning dialog. Guided flow
+            // above is primary.
+            SliverToBoxAdapter(
+              child: ListenableBuilder(
+                listenable: GlassPerfService.instance,
+                builder: (context, _) {
+                  if (!GlassPerfService.instance.oneShotUnlocked) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 4),
+                child: GlassContainer(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  borderRadius: 20,
+                  child: ExpansionTile(
+                    title: const Text('Inspector quick scan (one-shot)',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    subtitle: const Text('Single / pooled panels — no step verification',
+                        style: TextStyle(color: GlassTheme.textMuted, fontSize: 11)),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        child: _buildSegmentedTabBar(),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                        child: ListenableBuilder(
+                          listenable: GlassPerfService.instance,
+                          builder: (context, _) => GlassContainer(
+                            padding: const EdgeInsets.all(20),
+                            borderRadius: 28,
+                            child: _buildActiveTabContent(),
+                          ),
+                        ),
+                      ),
+                      if (_isLoading)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          child: Center(
+                            child: Text(
+                              'Multi-threaded ONNX DBNet text detection & Jan Vishwas statutory analysis in progress...',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: GlassTheme.textMuted, fontSize: 11, height: 1.4),
+                            ),
+                          ),
+                        ),
+                      if (_errorMessage != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: GlassContainer(
+                            padding: const EdgeInsets.all(14),
+                            borderRadius: 18,
+                            borderColor: GlassTheme.criticalCrimson.withValues(alpha: 0.5),
+                            child: Text(
+                              _errorMessage!,
+                              style: const TextStyle(color: GlassTheme.criticalCrimson, fontSize: 12),
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                    ],
                   ),
                 ),
+              );
+                },
               ),
-
-            if (_errorMessage != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: GlassContainer(
-                    padding: const EdgeInsets.all(14),
-                    borderRadius: 18,
-                    borderColor: GlassTheme.criticalCrimson.withValues(alpha: 0.5),
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: GlassTheme.criticalCrimson, fontSize: 12),
-                    ),
-                  ),
-                ),
-              ),
+            ),
 
             // Live Dev Log Console Widget
             SliverToBoxAdapter(

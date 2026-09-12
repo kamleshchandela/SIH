@@ -96,6 +96,19 @@ class GlassPerfService extends ChangeNotifier {
     _save();
   }
 
+  /// Inspector one-shot unlock: demoted one-shot controls stay hidden until
+  /// explicitly enabled in Engine settings behind a warning dialog.
+  /// Defaults off; persisted with the rest of the shell config.
+  bool _oneShotUnlocked = false;
+  bool get oneShotUnlocked => _oneShotUnlocked;
+
+  void setOneShotUnlocked(bool value) {
+    if (_oneShotUnlocked == value) return;
+    _oneShotUnlocked = value;
+    notifyListeners();
+    _save();
+  }
+
   Future<void> _init() async {
     await _load();
     await _resolveAuto();
@@ -137,7 +150,8 @@ class GlassPerfService extends ChangeNotifier {
     try {
       final file = await _configFile();
       if (file == null) return;
-      await file.writeAsString(jsonEncode({'mode': _mode.name, 'sober': _soberMode}));
+      await file.writeAsString(jsonEncode(
+          {'mode': _mode.name, 'sober': _soberMode, 'oneshot': _oneShotUnlocked}));
     } catch (e) {
       debugPrint('[GlassPerf] Could not persist glass mode: $e');
     }
@@ -154,6 +168,7 @@ class GlassPerfService extends ChangeNotifier {
           orElse: () => GlassMode.auto,
         );
         _soberMode = data['sober'] as bool? ?? true;
+        _oneShotUnlocked = data['oneshot'] as bool? ?? false;
         notifyListeners();
       }
     } catch (e) {

@@ -18,6 +18,8 @@ given so any finding can be reproduced exactly.
 | 8 | `08_full_image_zero_vertical_blindness.md` | Full pack shot scores 0% on phone? | Detector blind to the vertical statutory strip on all tiers/platforms — phone exonerated; overlay proof in `assets/`. |
 | 9 | `09_vertical_merge_fix.md` | Fix for the above? | Merge-only rotated full-res pass (correct CCW direction after a failed CW attempt), gate design; desktop 122→133, phone 0%→14%. Plus a documented false alarm: a claimed 90° mapping bug that the round-trip test disproved and was reverted. |
 | 10 | `10_arm_decode_divergence.md` | Phone scores below desktop on the same image? | ARM INT8 decodes the strip into different token shapes (dot shreds, lost price/tax); matchers hardened against both, phone-variant regression test; 28.6%→42.9%, field-identical to desktop. |
+| 11 | `11_guided_capture.md` | Forced 4-step capture spec | Parts, validators, 3-state scoring, session merge, demoted one-shot contract, tolerance-cliff rule. |
+| 12 | `12_pdf_columns_and_tolerance_cliff.md` | PDF columns empty? Matcher stuck? | Chained-Td off-page bug in both renderers (fixed with absolute Tm + rule citations); tolerance cliff documented with the NEIWEGHT/420c field case. |
 
 Evidence pool (inputs, all pulled from the phone, all hashed):
 

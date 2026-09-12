@@ -172,6 +172,15 @@ class _EngineScreenState extends State<EngineScreen> {
               // ==========================================
               _buildInspectorProfileCard(),
 
+              const SizedBox(height: 18),
+
+              // ==========================================
+              // SECTION 7 (ROCK BOTTOM): INSPECTOR QUICK SCAN UNLOCK
+              // Deliberately last: enabling one-shot must be intentional,
+              // never stumbled upon while scrolling settings.
+              // ==========================================
+              _buildOneShotUnlockCard(),
+
               SoberBottomSpacer(glassHeight: 100), // Space for floating bottom nav
             ],
           ),
@@ -712,6 +721,80 @@ class _EngineScreenState extends State<EngineScreen> {
         ],
       ),
     );
+  }
+
+  // --- DAEMON HOST CARD ---
+
+  /// Inspector one-shot unlock: the demoted one-shot controls on Inspect
+  /// stay hidden until this is enabled behind an explicit warning dialog.
+  /// Guided 4-step capture remains the primary flow either way.
+  Widget _buildOneShotUnlockCard() {
+    final perf = GlassPerfService.instance;
+    final unlocked = perf.oneShotUnlocked;
+    return ListenableBuilder(
+      listenable: perf,
+      builder: (context, _) => GlassContainer(
+        padding: const EdgeInsets.all(18),
+        borderRadius: 24,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'INSPECTOR QUICK SCAN',
+                  style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.bold),
+                ),
+                Switch.adaptive(
+                  value: GlassPerfService.instance.oneShotUnlocked,
+                  activeThumbColor: const Color(0xFFE8762B),
+                  onChanged: (v) {
+                    if (v) {
+                      _confirmOneShotUnlock();
+                    } else {
+                      GlassPerfService.instance.setOneShotUnlocked(false);
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              unlocked
+                  ? 'Unlocked — one-shot controls visible on Inspect.'
+                  : 'Locked — Inspect shows guided capture only.',
+              style: const TextStyle(color: GlassTheme.textMuted, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmOneShotUnlock() async {
+    final agreed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Enable inspector quick scan?'),
+        content: const Text(
+          'One-shot inspection skips step-by-step verification: wrong or incomplete photos are NOT rejected, and panel attribution is best-effort.\n\nGuided 4-step capture stays the recommended flow. Enable quick scan only if you frame complete declarations yourself.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('I understand — enable'),
+          ),
+        ],
+      ),
+    );
+    if (agreed == true && mounted) {
+      GlassPerfService.instance.setOneShotUnlocked(true);
+    }
   }
 
   // --- DAEMON HOST CARD ---

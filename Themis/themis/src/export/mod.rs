@@ -41,6 +41,7 @@ mod tests {
             },
             panel_qualities: vec![],
             tamper_analysis: None,
+            capture_mode: "one-shot".to_string(),
             raw_ocr_tokens: vec![],
         }
     }
