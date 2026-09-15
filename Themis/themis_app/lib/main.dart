@@ -1,15 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'screens/dossier_screen.dart';
 import 'screens/engine_screen.dart';
-import 'screens/inspect_screen.dart';
+import 'screens/home_screen.dart';
 import 'screens/metrics_screen.dart';
 import 'services/audit_storage_service.dart';
-import 'services/glass_perf_service.dart';
-import 'theme/glass_theme.dart';
-import 'theme/sober_theme.dart';
-import 'widgets/glass/fluid_background.dart';
-import 'widgets/glass/glass_bottom_bar.dart';
-import 'widgets/sober/sober_bottom_bar.dart';
+import 'theme/theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,9 +19,11 @@ class ThemisApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Themis Legal Metrology Inspector',
+      title: 'Themis — Legal Metrology Compliance Inspector',
       debugShowCheckedModeBanner: false,
-      theme: GlassTheme.theme,
+      theme: ThemisTheme.sunlightTheme,
+      darkTheme: ThemisTheme.darkSlateTheme,
+      themeMode: ThemeMode.light, // Sunlight Light Theme default for field operations
       home: const MainNavigationShell(),
     );
   }
@@ -40,90 +38,124 @@ class MainNavigationShell extends StatefulWidget {
 
 class _MainNavigationShellState extends State<MainNavigationShell> {
   int _currentIndex = 0;
-  final FocusNode _dossierSearchFocus = FocusNode();
 
   void _openTab(int index) => setState(() => _currentIndex = index);
 
-  void _onSearchFromBottomBar() {
-    _openTab(1);
-    Future.delayed(const Duration(milliseconds: 150), () {
-      if (mounted) {
-        _dossierSearchFocus.requestFocus();
-      }
-    });
-  }
-
   late final List<Widget> _screens = [
-    InspectScreen(onOpenTab: _openTab),
-    DossierScreen(searchFocusNode: _dossierSearchFocus),
-    const MetricsScreen(),
+    HomeScreen(onNavigateTab: _openTab),
+    const DossierScreen(),
+    // Dashboard screen wrapped in Dark Slate Theme per design specification
+    Theme(
+      data: ThemisTheme.darkSlateTheme,
+      child: const Scaffold(
+        backgroundColor: ThemisTheme.darkSlateBg,
+        body: MetricsScreen(),
+      ),
+    ),
     const EngineScreen(),
   ];
 
   @override
-  void dispose() {
-    _dossierSearchFocus.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Rebuilds the shell on tier/sober switches. The tab screens are const
-    // and keep their state; GlassContainer re-skins itself via its own
-    // ListenableBuilder, so the glass theme is never disturbed.
-    return ListenableBuilder(
-      listenable: GlassPerfService.instance,
-      builder: (context, _) {
-        final sober = GlassPerfService.instance.soberMode;
-        final viewport = Positioned.fill(
-          child: RepaintBoundary(
-            child: IndexedStack(
-              index: _currentIndex,
-              children: _screens,
+    final isDarkTab = _currentIndex == 2; // Insights/Dashboard is dark slate
+
+    return Scaffold(
+      backgroundColor: isDarkTab ? ThemisTheme.darkSlateBg : ThemisTheme.sunlightBg,
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: isDarkTab ? ThemisTheme.darkSlateSurface : ThemisTheme.sunlightSurface,
+          border: Border(
+            top: BorderSide(
+              color: isDarkTab ? ThemisTheme.darkSlateBorder : ThemisTheme.sunlightBorder,
+              width: 1,
             ),
           ),
-        );
-
-        Widget navBar = sober
-            ? SafeArea(
-                top: false,
-                child: SoberBottomBar(
-                  currentIndex: _currentIndex,
-                  onTap: (index) => setState(() => _currentIndex = index),
-                  onSearchTap: _onSearchFromBottomBar,
+        ),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 60,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(
+                  index: 0,
+                  icon: CupertinoIcons.house,
+                  activeIcon: CupertinoIcons.house_fill,
+                  label: 'Home',
+                  isDark: isDarkTab,
                 ),
-              )
-            : SafeArea(
-                top: false,
-                child: GlassBottomBar(
-                  currentIndex: _currentIndex,
-                  onTap: (index) {
-                    setState(() => _currentIndex = index);
-                  },
+                _buildNavItem(
+                  index: 1,
+                  icon: CupertinoIcons.folder,
+                  activeIcon: CupertinoIcons.folder_fill,
+                  label: 'Dossiers',
+                  isDark: isDarkTab,
                 ),
-              );
-
-        final stack = Stack(
-          children: [
-            viewport,
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: navBar,
+                _buildNavItem(
+                  index: 2,
+                  icon: CupertinoIcons.chart_pie,
+                  activeIcon: CupertinoIcons.chart_pie_fill,
+                  label: 'Insights',
+                  isDark: isDarkTab,
+                ),
+                _buildNavItem(
+                  index: 3,
+                  icon: CupertinoIcons.gear_alt,
+                  activeIcon: CupertinoIcons.gear_alt_fill,
+                  label: 'Settings',
+                  isDark: isDarkTab,
+                ),
+              ],
             ),
-          ],
-        );
+          ),
+        ),
+      ),
+    );
+  }
 
-        return Scaffold(
-          backgroundColor: sober ? SoberTheme.pageBg : GlassTheme.bgDark,
-          // Sober: flat page background, wallpaper pipeline fully out.
-          // Glass: existing fluid backdrop. Never both.
-          body: sober
-              ? Container(color: SoberTheme.pageBg, child: stack)
-              : FluidBackground(child: stack),
-        );
-      },
+  Widget _buildNavItem({
+    required int index,
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+    required bool isDark,
+  }) {
+    final isSelected = _currentIndex == index;
+    final selectedColor = ThemisTheme.amberPrimary;
+    final unselectedColor = isDark ? ThemisTheme.darkSlateTextMuted : ThemisTheme.sunlightTextMuted;
+
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => setState(() => _currentIndex = index),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isSelected ? activeIcon : icon,
+                size: 22,
+                color: isSelected ? selectedColor : unselectedColor,
+              ),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? selectedColor : unselectedColor,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
