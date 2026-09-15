@@ -1,17 +1,20 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import '../services/audit_storage_service.dart';
 import '../services/dev_logger.dart';
-import '../services/glass_perf_service.dart';
 import '../services/themis_api.dart';
-import '../theme/glass_theme.dart';
-import '../theme/sober_theme.dart';
-import '../widgets/glass/glass_container.dart';
-import '../widgets/risk_tier_badge.dart';
-import '../widgets/sober/sober_badge.dart';
-import '../widgets/sober/sober_spacer.dart';
+import '../theme/theme.dart';
+import '../widgets/primitives/themis_primitives.dart';
+
+/// Historical Dossiers & Inspection Records Screen
+///
+/// Built strictly for the Sunlight Light Theme for high-visibility field operations.
+/// Allows officers to:
+/// - Search past inspections by product name, SKU, or inspection ID.
+/// - Filter by statutory severity (All, Critical, Moderate, Compliant).
+/// - Inspect full statutory details and penalty compound breakdown.
+/// - Export offline ISO PDF 1.4 notices and audit CSVs via system SAF picker.
 class DossierScreen extends StatefulWidget {
   final FocusNode? searchFocusNode;
   const DossierScreen({super.key, this.searchFocusNode});
@@ -29,10 +32,6 @@ class _DossierScreenState extends State<DossierScreen> {
   List<Map<String, dynamic>> _inspections = [];
   bool _isLoading = true;
   String _selectedFilter = 'All';
-
-  /// Sober brand swap — valid inside the build listener below.
-  Color _acc(Color c) =>
-      SoberTheme.swap(c, GlassPerfService.instance.soberMode);
 
   @override
   void initState() {
@@ -61,8 +60,6 @@ class _DossierScreenState extends State<DossierScreen> {
         riskTier: _selectedFilter == 'All' ? null : _selectedFilter,
         search: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
       );
-      // Count line: proves what the registry actually returned (diagnoses
-      // "history visible, then empty" reports without guessing).
       DevLogger.instance.info(
         'DOSSIER',
         'Loaded ${results.length} record(s) from local registry (filter: $_selectedFilter).',
@@ -73,22 +70,10 @@ class _DossierScreenState extends State<DossierScreen> {
           _isLoading = false;
         });
       }
-    } catch (e, st) {
-      DevLogger.instance.error('DOSSIER', 'History load failed: $e');
-      DevLogger.instance.error('STACK', st.toString().split('\n').take(3).join(' | '));
+    } catch (e) {
+      DevLogger.instance.warn('DOSSIER', 'Error fetching inspection history: $e');
       if (mounted) {
-        setState(() {
-          _inspections = [];
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not load audit history: $e',
-                style: const TextStyle(color: Colors.white, fontSize: 12)),
-            backgroundColor: const Color(0xFF1E1B4B),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -105,10 +90,7 @@ class _DossierScreenState extends State<DossierScreen> {
         mimeType: 'application/pdf',
       );
 
-      if (uri == null) {
-        return; // User canceled the picker
-      }
-
+      if (uri == null) return;
       _showToast('Notice PDF saved successfully');
     } catch (e) {
       _showToast('PDF Export failed: $e');
@@ -127,10 +109,7 @@ class _DossierScreenState extends State<DossierScreen> {
         mimeType: 'text/csv',
       );
 
-      if (uri == null) {
-        return; // User canceled the picker
-      }
-
+      if (uri == null) return;
       _showToast('Audit CSV saved successfully');
     } catch (e) {
       _showToast('CSV Export failed: $e');
@@ -141,12 +120,28 @@ class _DossierScreenState extends State<DossierScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: const TextStyle(color: Colors.white, fontSize: 12)),
-        backgroundColor: const Color(0xFF1E1B4B),
+        content: Text(
+          msg,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: ThemisTheme.sunlightTextPrimary,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ThemisTheme.radius8)),
       ),
     );
+  }
+
+  StatutoryStatus _parseStatus(String tier) {
+    final t = tier.toLowerCase();
+    if (t.contains('compliant')) return StatutoryStatus.compliant;
+    if (t.contains('warning') || t.contains('moderate') || t.contains('advisory') || t.contains('low')) {
+      return StatutoryStatus.warning;
+    }
+    return StatutoryStatus.violation;
   }
 
   void _showDetailsModal(Map<String, dynamic> item) {
@@ -161,169 +156,187 @@ class _DossierScreenState extends State<DossierScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xF20B0C1E),
-      barrierColor: Colors.black.withValues(alpha: 0.65),
+      backgroundColor: ThemisTheme.sunlightSurface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(ThemisTheme.radius16)),
       ),
       isScrollControlled: true,
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 36),
+          padding: const EdgeInsets.fromLTRB(
+            ThemisTheme.space20,
+            ThemisTheme.space16,
+            ThemisTheme.space20,
+            ThemisTheme.space32,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
                 child: Container(
-                  width: 38,
+                  width: 44,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(2),
+                    color: ThemisTheme.sunlightBorderStrong,
+                    borderRadius: BorderRadius.circular(ThemisTheme.radius4),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: ThemisTheme.space16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  RiskTierBadge(riskTier: risk),
+                  StatutoryBadge(
+                    status: _parseStatus(risk),
+                    customLabel: risk.toUpperCase(),
+                  ),
                   Text(
                     'Score: ${score.toStringAsFixed(1)}%',
                     style: TextStyle(
-                      color: score >= 80
-                          ? _acc(GlassTheme.compliantCyan)
-                          : (score >= 50 ? GlassTheme.moderateRiskAmber : GlassTheme.criticalCrimson),
                       fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
+                      color: score >= 80
+                          ? ThemisTheme.statusCompliant
+                          : (score >= 50 ? ThemisTheme.statusWarning : ThemisTheme.statusViolation),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: ThemisTheme.space12),
               Text(
                 name,
-                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: ThemisTheme.sunlightTextPrimary,
+                ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: ThemisTheme.space4),
               Text(
                 'ID: $id',
-                style: const TextStyle(color: GlassTheme.textMuted, fontSize: 11, fontFamily: 'monospace'),
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontFamily: 'monospace',
+                  color: ThemisTheme.sunlightTextSecondary,
+                ),
               ),
               if (createdAt.isNotEmpty) ...[
-                const SizedBox(height: 2),
+                const SizedBox(height: ThemisTheme.space2),
                 Text(
                   'Timestamp: $createdAt',
-                  style: const TextStyle(color: GlassTheme.textMuted, fontSize: 10),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: ThemisTheme.sunlightTextMuted,
+                  ),
                 ),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: ThemisTheme.space16),
+
+              // Violation & Fine breakdown card
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(ThemisTheme.space16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                  color: ThemisTheme.sunlightBg,
+                  borderRadius: BorderRadius.circular(ThemisTheme.radius12),
+                  border: Border.all(color: ThemisTheme.sunlightBorder),
                 ),
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Total Violations:', style: TextStyle(color: GlassTheme.textSecondary, fontSize: 12)),
+                        const Text(
+                          'Defects Identified:',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: ThemisTheme.sunlightTextSecondary,
+                          ),
+                        ),
                         Text(
-                          '$violations statutory defects',
-                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                          '$violations statutory omissions',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: ThemisTheme.sunlightTextPrimary,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    // Sober: saffron fee badge. Glass: existing fine row.
-                    // Modal builds fresh on open, so a direct read is enough.
-                    if (GlassPerfService.instance.soberMode)
-                      Row(
-                        children: [
-                          SoberBadge(
-                            amount: '₹$fine',
-                            caption: 'Compounding fine • INR',
+                    const SizedBox(height: ThemisTheme.space8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Compounding Penalty:',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: ThemisTheme.sunlightTextSecondary,
                           ),
-                        ],
-                      )
-                    else
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Compounding Fine:', style: TextStyle(color: GlassTheme.textSecondary, fontSize: 12)),
-                          Text(
-                            '₹$fine INR',
-                            style: const TextStyle(
-                              color: GlassTheme.criticalCrimson,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                            ),
+                        ),
+                        Text(
+                          'Rs. $fine INR',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: ThemisTheme.amberHover,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
                     if (panels.isNotEmpty) ...[
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Panels Audited:', style: TextStyle(color: GlassTheme.textSecondary, fontSize: 12)),
-                          Text(
-                            '${panels.length} panel(s)',
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
-                          ),
-                        ],
+                      const SizedBox(height: ThemisTheme.space12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: panels.map((p) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: ThemisTheme.sunlightSurface,
+                                borderRadius: BorderRadius.circular(ThemisTheme.radius4),
+                                border: Border.all(color: ThemisTheme.sunlightBorder),
+                              ),
+                              child: Text(
+                                p.toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: ThemisTheme.sunlightTextSecondary,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _downloadPdf(id);
-                      },
-                      icon: const Icon(CupertinoIcons.doc_fill, size: 14, color: Colors.black),
-                      label: const Text(
-                        'Export PDF Notice',
-                        style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.w800),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _downloadCsv(id);
-                      },
-                      icon: const Icon(CupertinoIcons.table, size: 14, color: Colors.white),
-                      label: const Text(
-                        'Export CSV Audit',
-                        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      ),
-                    ),
-                  ),
-                ],
+
+              const SizedBox(height: ThemisTheme.space20),
+
+              ThemisButton(
+                label: 'Download Statutory Notice (PDF)',
+                leadingIcon: CupertinoIcons.doc_text_fill,
+                variant: ThemisButtonVariant.primaryAmber,
+                isPrimaryCTA: true,
+                onPressed: () {
+                  Navigator.pop(context);
+                  _downloadPdf(id);
+                },
+              ),
+              const SizedBox(height: ThemisTheme.space8),
+              ThemisButton(
+                label: 'Export Inspection Audit (CSV)',
+                leadingIcon: CupertinoIcons.table,
+                variant: ThemisButtonVariant.secondaryOutline,
+                onPressed: () {
+                  Navigator.pop(context);
+                  _downloadCsv(id);
+                },
               ),
             ],
           ),
@@ -335,281 +348,360 @@ class _DossierScreenState extends State<DossierScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        bottom: false,
-        // Rebuilds on sober toggle (hot-apply); _fetchHistory only runs on
-        // init/filter/search, so this never refetches.
-        child: ListenableBuilder(
-          listenable: GlassPerfService.instance,
-          builder: (context, _) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      backgroundColor: ThemisTheme.sunlightBg,
+      appBar: ThemisAppBar(
+        title: 'AUDIT DOSSIER',
+        subtitle: 'Directorate of Legal Metrology - Inspection History',
+        roleBadge: 'FIELD OFFICER',
+        isDark: false,
+        isOffline: false,
+        actions: [
+          IconButton(
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: ThemisTheme.amberPrimary),
+                  )
+                : const Icon(CupertinoIcons.arrow_clockwise, size: 18, color: ThemisTheme.sunlightTextSecondary),
+            onPressed: _fetchHistory,
+            tooltip: 'Refresh History',
+          ),
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ===============================================================
+          // 1. Search Bar
+          // ===============================================================
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              ThemisTheme.space16,
+              ThemisTheme.space12,
+              ThemisTheme.space16,
+              ThemisTheme.space8,
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: ThemisTheme.space12),
+              decoration: BoxDecoration(
+                color: ThemisTheme.sunlightSurface,
+                borderRadius: BorderRadius.circular(ThemisTheme.radius12),
+                border: Border.all(color: ThemisTheme.sunlightBorder),
+              ),
+              child: TextField(
+                controller: _searchController,
+                focusNode: _effectiveFocusNode,
+                onSubmitted: (_) => _fetchHistory(),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: ThemisTheme.sunlightTextPrimary,
+                ),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  icon: const Icon(CupertinoIcons.search, size: 18, color: ThemisTheme.amberPrimary),
+                  hintText: 'Search product, commodity or inspection ID...',
+                  hintStyle: const TextStyle(
+                    fontSize: 13,
+                    color: ThemisTheme.sunlightTextMuted,
+                  ),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(CupertinoIcons.clear_circled_solid, size: 16, color: ThemisTheme.sunlightTextMuted),
+                          onPressed: () {
+                            _searchController.clear();
+                            _fetchHistory();
+                          },
+                        )
+                      : null,
+                ),
+              ),
+            ),
+          ),
+
+          // ===============================================================
+          // 2. Filter Chips Row
+          // ===============================================================
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: ThemisTheme.space16, vertical: ThemisTheme.space4),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'THEMIS // HISTORICAL DOSSIERS',
-                        style: TextStyle(
-                          color: GlassTheme.textMuted,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'Audit Registry',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.6,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(CupertinoIcons.arrow_clockwise, color: _acc(GlassTheme.bgNeonCyan), size: 18),
-                    onPressed: _fetchHistory,
-                    tooltip: 'Refresh History',
-                  ),
-                ],
-              ),
-            ),
+                children: ['All', 'CriticalSevere', 'ModerateRisk', 'Compliant'].map((tier) {
+                  final isSelected = _selectedFilter == tier;
+                  final label = tier == 'CriticalSevere'
+                      ? 'Critical'
+                      : tier == 'ModerateRisk'
+                          ? 'Moderate'
+                          : tier;
 
-            // Search Box
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  focusNode: _effectiveFocusNode,
-                  onSubmitted: (_) => _fetchHistory(),
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    icon: Icon(CupertinoIcons.search, size: 16, color: _acc(GlassTheme.bgNeonCyan)),
-                    hintText: 'Search by Product Name or Inspection ID...',
-                    hintStyle: const TextStyle(color: GlassTheme.textMuted, fontSize: 13),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: GlassTheme.textMuted),
-                            onPressed: () {
-                              _searchController.clear();
-                              _fetchHistory();
-                            },
-                          )
-                        : null,
-                  ),
-                ),
-              ),
-            ),
-
-            // Filter Chips
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Row(
-                  children: ['All', 'CriticalSevere', 'ModerateRisk', 'Compliant'].map((tier) {
-                    final isSelected = _selectedFilter == tier;
-                    return GestureDetector(
+                  return Padding(
+                    padding: const EdgeInsets.only(right: ThemisTheme.space8),
+                    child: InkWell(
                       onTap: () {
                         setState(() => _selectedFilter = tier);
                         _fetchHistory();
                       },
+                      borderRadius: BorderRadius.circular(ThemisTheme.radius16),
                       child: Container(
-                        margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.22)
-                              : Colors.white.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(20),
+                          color: isSelected ? ThemisTheme.amberPrimary : ThemisTheme.sunlightSurface,
+                          borderRadius: BorderRadius.circular(ThemisTheme.radius16),
                           border: Border.all(
-                            color: isSelected
-                                ? _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.6)
-                                : Colors.white.withValues(alpha: 0.12),
+                            color: isSelected ? ThemisTheme.amberPrimary : ThemisTheme.sunlightBorder,
                           ),
                         ),
                         child: Text(
-                          tier == 'CriticalSevere'
-                              ? 'Critical'
-                              : tier == 'ModerateRisk'
-                                  ? 'Moderate'
-                                  : tier,
+                          label,
                           style: TextStyle(
-                            color: isSelected ? _acc(GlassTheme.bgNeonCyan) : GlassTheme.textSecondary,
-                            fontSize: 11.5,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                            fontSize: 12,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                            color: isSelected ? Colors.white : ThemisTheme.sunlightTextSecondary,
                           ),
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
+          ),
 
-            const SizedBox(height: 8),
+          const SizedBox(height: ThemisTheme.space8),
 
-            // Inspections List
-            Expanded(
-              child: _isLoading
-                  ? Center(child: CircularProgressIndicator(color: _acc(GlassTheme.bgNeonCyan), strokeWidth: 2))
-                  : _inspections.isEmpty
-                      ? Center(
+          // ===============================================================
+          // 3. Inspection History List
+          // ===============================================================
+          Expanded(
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(color: ThemisTheme.amberPrimary),
+                  )
+                : _inspections.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(ThemisTheme.space32),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(CupertinoIcons.doc_text_search, size: 36, color: GlassTheme.textMuted),
-                              SizedBox(height: 12),
-                              Text('No historical audits recorded', style: TextStyle(color: GlassTheme.textSecondary, fontSize: 13)),
-                              SizedBox(height: 4),
-                              Text('Perform an audit in the Inspect tab to persist records.', style: TextStyle(color: GlassTheme.textMuted, fontSize: 11)),
-                            ],
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _fetchHistory,
-                          color: Colors.black,
-                          backgroundColor: _acc(GlassTheme.bgNeonCyan),
-                          child: ListenableBuilder(
-                            listenable: GlassPerfService.instance,
-                            builder: (context, _) => ListView.builder(
-                              physics: const BouncingScrollPhysics(),
-                              padding: EdgeInsets.fromLTRB(
-                                20,
-                                6,
-                                20,
-                                SoberBottomSpacer.clearanceOf(
-                                  GlassPerfService.instance.soberMode,
-                                  90,
+                            children: [
+                              Container(
+                                width: 64,
+                                height: 64,
+                                decoration: const BoxDecoration(
+                                  color: ThemisTheme.amberTint,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  CupertinoIcons.doc_text_search,
+                                  size: 32,
+                                  color: ThemisTheme.amberPrimary,
                                 ),
                               ),
-                            itemCount: _inspections.length,
-                            itemBuilder: (context, index) {
-                              final item = _inspections[index];
-                              final id = item['inspection_id'] as String? ?? '';
-                              final name = item['product_name'] as String? ?? 'Pre-packaged Commodity';
-                              final risk = item['risk_tier'] as String? ?? 'CriticalSevere';
-                              final fine = item['compounding_fine_inr'] ?? 0;
-                              final score = (item['compliance_score_pct'] as num?)?.toDouble() ?? 0.0;
+                              const SizedBox(height: ThemisTheme.space16),
+                              const Text(
+                                'No Historical Dossiers Found',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: ThemisTheme.sunlightTextPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: ThemisTheme.space8),
+                              const Text(
+                                'Completed multi-panel inspections and statutory notices will appear here.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: ThemisTheme.sunlightTextSecondary,
+                                ),
+                              ),
+                              if (_selectedFilter != 'All' || _searchController.text.isNotEmpty) ...[
+                                const SizedBox(height: ThemisTheme.space16),
+                                OutlinedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedFilter = 'All';
+                                      _searchController.clear();
+                                    });
+                                    _fetchHistory();
+                                  },
+                                  child: const Text('Reset Search & Filters'),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: ThemisTheme.space16,
+                          vertical: ThemisTheme.space8,
+                        ),
+                        itemCount: _inspections.length,
+                        itemBuilder: (context, index) {
+                          final item = _inspections[index];
+                          final id = item['inspection_id'] as String? ?? '';
+                          final name = item['product_name'] as String? ?? 'Pre-packaged Commodity';
+                          final risk = item['risk_tier'] as String? ?? 'CriticalSevere';
+                          final fine = item['compounding_fine_inr'] ?? 0;
+                          final score = (item['compliance_score_pct'] as num?)?.toDouble() ?? 0.0;
+                          final panels = (item['scanned_panels'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
 
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: GestureDetector(
-                                  onTap: () => _showDetailsModal(item),
-                                  child: GlassContainer(
-                                    padding: const EdgeInsets.all(16),
-                                    borderRadius: 22,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: ThemisTheme.space12),
+                            decoration: BoxDecoration(
+                              color: ThemisTheme.sunlightSurface,
+                              borderRadius: BorderRadius.circular(ThemisTheme.radius12),
+                              border: Border.all(color: ThemisTheme.sunlightBorder),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.03),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: InkWell(
+                              onTap: () => _showDetailsModal(item),
+                              borderRadius: BorderRadius.circular(ThemisTheme.radius12),
+                              child: Padding(
+                                padding: const EdgeInsets.all(ThemisTheme.space16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            RiskTierBadge(riskTier: risk),
-                                            Text(
-                                              'Score: ${score.toStringAsFixed(0)}%',
-                                              style: TextStyle(
-                                                color: score >= 80
-                                                    ? _acc(GlassTheme.compliantCyan)
-                                                    : (score >= 50 ? GlassTheme.moderateRiskAmber : GlassTheme.criticalCrimson),
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                        StatutoryBadge(
+                                          status: _parseStatus(risk),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: (score >= 80
+                                                    ? ThemisTheme.statusCompliant
+                                                    : (score >= 50
+                                                        ? ThemisTheme.statusWarning
+                                                        : ThemisTheme.statusViolation))
+                                                .withValues(alpha: 0.12),
+                                            borderRadius: BorderRadius.circular(ThemisTheme.radius4),
+                                          ),
+                                          child: Text(
+                                            'Score: ${score.toStringAsFixed(0)}%',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: score >= 80
+                                                  ? ThemisTheme.statusCompliant
+                                                  : (score >= 50
+                                                      ? ThemisTheme.statusWarning
+                                                      : ThemisTheme.statusViolation),
                                             ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Text(
-                                          name,
-                                          style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          id,
-                                          style: const TextStyle(color: GlassTheme.textMuted, fontSize: 11, fontFamily: 'monospace'),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        Divider(color: Colors.white.withValues(alpha: 0.08)),
-                                        const SizedBox(height: 8),
-                                        ListenableBuilder(
-                                          listenable: GlassPerfService.instance,
-                                          builder: (context, _) {
-                                            // Sober: saffron fee badge. Glass:
-                                            // existing fine row. Card shell
-                                            // re-skins via GlassContainer.
-                                            if (GlassPerfService.instance.soberMode) {
-                                              return Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  SoberBadge(
-                                                    amount: '₹$fine',
-                                                    caption: 'Compounding fine',
-                                                  ),
-                                                  const Row(
-                                                    children: [
-                                                      Text(
-                                                        'View Dossier',
-                                                        style: TextStyle(color: Color(0xFFE8762B), fontSize: 11, fontWeight: FontWeight.w700),
-                                                      ),
-                                                      SizedBox(width: 4),
-                                                      Icon(CupertinoIcons.chevron_right, size: 10, color: Color(0xFFE8762B)),
-                                                    ],
-                                                  ),
-                                                ],
-                                              );
-                                            }
-                                            return Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text(
-                                                  'Fine: ₹$fine INR',
-                                                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
-                                                ),
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        'View Dossier',
-                                                        style: TextStyle(color: _acc(GlassTheme.bgNeonCyan), fontSize: 11, fontWeight: FontWeight.w700),
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Icon(CupertinoIcons.chevron_right, size: 10, color: _acc(GlassTheme.bgNeonCyan)),
-                                                    ],
-                                                  ),
-                                              ],
-                                            );
-                                          },
+                                          ),
                                         ),
                                       ],
                                     ),
-                                  ),
+                                    const SizedBox(height: ThemisTheme.space8),
+                                    Text(
+                                      name,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: ThemisTheme.sunlightTextPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: ThemisTheme.space4),
+                                    Text(
+                                      'ID: $id',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontFamily: 'monospace',
+                                        color: ThemisTheme.sunlightTextMuted,
+                                      ),
+                                    ),
+                                    if (panels.isNotEmpty) ...[
+                                      const SizedBox(height: ThemisTheme.space8),
+                                      Wrap(
+                                        spacing: 4,
+                                        runSpacing: 4,
+                                        children: panels.map((p) {
+                                          return Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: ThemisTheme.sunlightBg,
+                                              borderRadius: BorderRadius.circular(ThemisTheme.radius4),
+                                              border: Border.all(color: ThemisTheme.sunlightBorder),
+                                            ),
+                                            child: Text(
+                                              p.toUpperCase(),
+                                              style: const TextStyle(
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.w700,
+                                                color: ThemisTheme.sunlightTextSecondary,
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ],
+                                    const SizedBox(height: ThemisTheme.space12),
+                                    const Divider(height: 1, color: ThemisTheme.sunlightBorder),
+                                    const SizedBox(height: ThemisTheme.space8),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Compounding: Rs. $fine INR',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                            color: ThemisTheme.amberHover,
+                                          ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(
+                                                CupertinoIcons.arrow_down_doc_fill,
+                                                size: 16,
+                                                color: ThemisTheme.amberPrimary,
+                                              ),
+                                              tooltip: 'Download PDF Notice',
+                                              onPressed: () => _downloadPdf(id),
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                            ),
+                                            const SizedBox(width: ThemisTheme.space4),
+                                            const Text(
+                                              'Details',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                                color: ThemisTheme.amberPrimary,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 2),
+                                            const Icon(
+                                              CupertinoIcons.chevron_right,
+                                              size: 12,
+                                              color: ThemisTheme.amberPrimary,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              );
-                            },
+                              ),
                             ),
-                          ),
-                        ),
-              ),
-            ],
+                          );
+                        },
+                      ),
           ),
-        ),
+        ],
       ),
     );
   }
