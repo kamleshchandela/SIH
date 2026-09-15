@@ -1,15 +1,19 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../services/glass_perf_service.dart';
+import '../services/audit_storage_service.dart';
 import '../services/themis_api.dart';
-import '../services/wallpaper_service.dart';
-import '../theme/glass_theme.dart';
-import '../theme/sober_theme.dart';
-import '../widgets/glass/glass_container.dart';
-import '../widgets/sober/sober_spacer.dart';
+import '../theme/theme.dart';
+import '../widgets/primitives/themis_primitives.dart';
 import 'dev_logs_screen.dart';
 
+/// Engine, System Diagnostics & Officer Profile Screen
+///
+/// Built strictly for the Sunlight Light Theme for high-visibility field operations.
+/// Configures:
+/// - Officer credentials and jurisdictional enforcement circle.
+/// - Model execution tier (On-Device Compact INT8, High Precision INT8, Remote Server).
+/// - Remote daemon endpoint and connection health diagnostics.
+/// - Statutory rule coverage and local audit cache maintenance.
 class EngineScreen extends StatefulWidget {
   const EngineScreen({super.key});
 
@@ -19,23 +23,24 @@ class EngineScreen extends StatefulWidget {
 
 class _EngineScreenState extends State<EngineScreen> {
   final ThemisApiService _api = ThemisApiService();
-  final WallpaperService _wallpaperService = WallpaperService.instance;
   late final TextEditingController _urlController;
 
   bool _isChecking = false;
   bool? _isHealthy;
-  String _selectedProfile = '5/6 Workers (~83%)';
   late EngineModelOption _selectedModelTier;
 
-  bool get _isMobile => Platform.isAndroid || Platform.isIOS;
+  @override
+  void initState() {
+    super.initState();
+    _selectedModelTier = _api.modelOption;
+    _urlController = TextEditingController(text: _api.baseUrl);
+    _testConnection();
+  }
 
-  bool get _shouldShowConcurrencyCard {
-    if (!_isMobile) {
-      // Desktop workstation runs multi-worker rayon threadpool locally or remotely
-      return true;
-    }
-    // On mobile: strictly only show if Remote Server mode is selected AND connected over LAN/WAN
-    return _selectedModelTier == EngineModelOption.remoteServer && _isHealthy == true;
+  @override
+  void dispose() {
+    _urlController.dispose();
+    super.dispose();
   }
 
   void _onModelTierChanged(EngineModelOption option) {
@@ -43,1191 +48,449 @@ class _EngineScreenState extends State<EngineScreen> {
     _api.setModelOption(option);
   }
 
-  /// Sober brand swap — safe anywhere in this screen: Engine already
-  /// rebuilds on every GlassPerfService change (line 33 listener).
-  Color _acc(Color c) =>
-      SoberTheme.swap(c, GlassPerfService.instance.soberMode);
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedModelTier = _api.modelOption;
-    _urlController = TextEditingController(text: _api.baseUrl);
-    _wallpaperService.addListener(_onWallpaperUpdated);
-    GlassPerfService.instance.addListener(_onWallpaperUpdated);
-    _testConnection();
-  }
-
-  void _onWallpaperUpdated() {
-    if (mounted) setState(() {});
-  }
-
-  @override
-  void dispose() {
-    _wallpaperService.removeListener(_onWallpaperUpdated);
-    GlassPerfService.instance.removeListener(_onWallpaperUpdated);
-    _urlController.dispose();
-    super.dispose();
-  }
-
   Future<void> _testConnection() async {
     setState(() => _isChecking = true);
     _api.updateBaseUrl(_urlController.text.trim());
     final healthy = await _api.checkHealth();
-    setState(() {
-      _isHealthy = healthy;
-      _isChecking = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isHealthy = healthy;
+        _isChecking = false;
+      });
+    }
+  }
+
+  void _showToast(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          msg,
+          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: ThemisTheme.sunlightTextPrimary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ThemisTheme.radius8)),
+      ),
+    );
+  }
+
+  void _confirmClearCache() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: ThemisTheme.sunlightSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ThemisTheme.radius16)),
+        title: const Text(
+          'Purge Local Inspection Cache?',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: ThemisTheme.sunlightTextPrimary,
+          ),
+        ),
+        content: const Text(
+          'This will remove all cached audit dossiers stored on this device. Any un-exported statutory notices will be permanently purged.',
+          style: TextStyle(fontSize: 13, color: ThemisTheme.sunlightTextSecondary, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: ThemisTheme.sunlightTextSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemisTheme.statusViolation,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ThemisTheme.radius8)),
+            ),
+            onPressed: () async {
+              Navigator.pop(context);
+              await AuditStorageService.instance.clearAll();
+              _showToast('Local inspection cache purged.');
+              setState(() {});
+            },
+            child: const Text('Purge Cache'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final localCount = AuditStorageService.instance.allInspections.length;
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              const Text(
-                'THEMIS // SYSTEM & BACKDROP CONFIG',
-                style: TextStyle(
-                  color: GlassTheme.textMuted,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const SizedBox(height: 2),
-              const Text(
-                'Settings & Engine',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.6,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // ==========================================
-              // SECTION 1: WALLPAPER & GLASS BACKDROP
-              // ==========================================
-              _buildWallpaperSection(),
-
-              const SizedBox(height: 18),
-
-              // ==========================================
-              // SECTION 1B: GLASS QUALITY (PERF TIERS)
-              // ==========================================
-              _buildGlassQualityCard(),
-
-              const SizedBox(height: 18),
-
-              // ==========================================
-              // SECTION 1C: SOBER MODE (JUDGE-SAFE SKIN)
-              // ==========================================
-              _buildSoberModeCard(),
-
-              const SizedBox(height: 18),
-
-              // ==========================================
-              // SECTION 2: AI VISION MODEL TIER
-              // ==========================================
-              _buildModelTierCard(),
-
-              const SizedBox(height: 18),
-
-              // ==========================================
-              // SECTION 3: BACKEND DAEMON HOST (LAN/WAN)
-              // ==========================================
-              _buildDaemonHostCard(),
-
-              if (_shouldShowConcurrencyCard) ...[
-                const SizedBox(height: 18),
-                // ==========================================
-                // SECTION 4: HARDWARE CONCURRENCY PROFILE
-                // ==========================================
-                _buildConcurrencyCard(),
-              ] else if (_isMobile && _selectedModelTier == EngineModelOption.remoteServer) ...[
-                const SizedBox(height: 18),
-                _buildRemoteDisconnectedNotice(),
-              ],
-
-              const SizedBox(height: 18),
-
-              // ==========================================
-              // SECTION 5: DIAGNOSTICS & TELEMETRY
-              // ==========================================
-              _buildDiagnosticsCard(),
-
-              const SizedBox(height: 18),
-
-              // ==========================================
-              // SECTION 6: INSPECTOR PROFILE
-              // ==========================================
-              _buildInspectorProfileCard(),
-
-              const SizedBox(height: 18),
-
-              // ==========================================
-              // SECTION 7 (ROCK BOTTOM): INSPECTOR QUICK SCAN UNLOCK
-              // Deliberately last: enabling one-shot must be intentional,
-              // never stumbled upon while scrolling settings.
-              // ==========================================
-              _buildOneShotUnlockCard(),
-
-              SoberBottomSpacer(glassHeight: 100), // Space for floating bottom nav
-            ],
-          ),
-        ),
+      backgroundColor: ThemisTheme.sunlightBg,
+      appBar: ThemisAppBar(
+        title: 'ENGINE & CONFIGURATION',
+        subtitle: 'Directorate of Legal Metrology - System Administration',
+        roleBadge: 'ADMIN / OFFICER',
+        isDark: false,
+        isOffline: false,
       ),
-    );
-  }
-
-  // --- WALLPAPER SELECTOR SECTION ---
-
-  Widget _buildWallpaperSection() {
-    return GlassContainer(
-      padding: const EdgeInsets.all(18),
-      borderRadius: 24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: ListView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: ThemisTheme.space16,
+          vertical: ThemisTheme.space16,
+        ),
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(CupertinoIcons.sparkles, size: 16, color: _acc(GlassTheme.bgNeonCyan)),
-                  SizedBox(width: 8),
-                  Text(
-                    'WALLPAPER & GLASS BACKDROP',
-                    style: TextStyle(
-                      color: GlassTheme.textSecondary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.35)),
-                ),
-                child: Text(
-                  _wallpaperService.activeName,
-                  style: TextStyle(
-                    color: _acc(GlassTheme.bgNeonCyan),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Select a crystal backdrop or attach custom art to shine beneath the frosted refraction layer.',
-            style: TextStyle(color: GlassTheme.textMuted, fontSize: 12, height: 1.3),
-          ),
-          const SizedBox(height: 16),
-
-          // Attachment Button: Native SAF file picker
-          GestureDetector(
-            onTap: () async {
-              final ok = await _wallpaperService.pickCustomWallpaper();
-              if (ok && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Custom wallpaper applied successfully!'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0x3300F2FE), Color(0x220072FF)],
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.45)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(CupertinoIcons.paperclip, color: _acc(GlassTheme.bgNeonCyan), size: 16),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          '+ Attach Any Image (Native SAF)',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Select PNG, JPG, or WebP from storage (bypasses gallery issues)',
-                          style: TextStyle(color: GlassTheme.textMuted, fontSize: 10.5),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (_wallpaperService.isCustomSelected)
-                    Icon(CupertinoIcons.checkmark_seal_fill, color: _acc(GlassTheme.bgNeonCyan), size: 18),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Horizontal Carousel of Presets
-          SizedBox(
-            height: 140,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              children: [
-                // Preset 0: Dynamic Fluid Mesh
-                _buildDynamicMeshCard(),
-
-                // Presets 1..N: Bundled Wallpapers
-                ...WallpaperService.presets.map((preset) => _buildPresetThumbnailCard(preset)),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          // Tint Scrim Opacity Slider
-          Row(
-            children: [
-              const Icon(CupertinoIcons.sun_min, size: 14, color: GlassTheme.textMuted),
-              const SizedBox(width: 8),
-              const Text(
-                'Glass Scrim Tint:',
-                style: TextStyle(color: GlassTheme.textMuted, fontSize: 11, fontWeight: FontWeight.w600),
-              ),
-              Expanded(
-                child: SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    activeTrackColor: _acc(GlassTheme.bgNeonCyan),
-                    inactiveTrackColor: Colors.white.withValues(alpha: 0.15),
-                    thumbColor: Colors.white,
-                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-                    trackHeight: 3,
-                  ),
-                  child: Slider(
-                    value: _wallpaperService.tintOpacity,
-                    min: 0.10,
-                    max: 0.65,
-                    onChanged: (val) {
-                      _wallpaperService.setTintOpacity(val);
-                    },
-                  ),
-                ),
-              ),
-              Text(
-                '${(_wallpaperService.tintOpacity * 100).toInt()}%',
-                style: const TextStyle(
-                  color: GlassTheme.textSecondary,
-                  fontSize: 11,
-                  fontFamily: 'monospace',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDynamicMeshCard() {
-    final isSelected = _wallpaperService.isMeshSelected;
-
-    return GestureDetector(
-      onTap: () => _wallpaperService.setMesh(),
-      child: Container(
-        width: 100,
-        margin: const EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isSelected ? _acc(GlassTheme.bgNeonCyan) : Colors.white.withValues(alpha: 0.18),
-            width: isSelected ? 2.0 : 1.0,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    spreadRadius: -2,
-                  ),
-                ]
-              : null,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(17),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Dynamic Gradient Swatch
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF00F2FE),
-                      Color(0xFF0072FF),
-                      Color(0xFF7F00FF),
-                      Color(0xFFE0C3FC),
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                color: Colors.black.withValues(alpha: 0.3),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (isSelected)
-                      const Align(
-                        alignment: Alignment.topRight,
-                        child: Icon(CupertinoIcons.checkmark_circle_fill, size: 16, color: Colors.white),
-                      )
-                    else
-                      const SizedBox(height: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Dynamic',
-                          style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800),
-                        ),
-                        Text(
-                          'Fluid Mesh',
-                          style: TextStyle(color: Colors.white70, fontSize: 9.5),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPresetThumbnailCard(WallpaperPreset preset) {
-    final isSelected = _wallpaperService.isSelected(preset);
-
-    return GestureDetector(
-      onTap: () => _wallpaperService.setPreset(preset),
-      child: Container(
-        width: 100,
-        margin: const EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isSelected ? _acc(GlassTheme.bgNeonCyan) : Colors.white.withValues(alpha: 0.18),
-            width: isSelected ? 2.0 : 1.0,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    spreadRadius: -2,
-                  ),
-                ]
-              : null,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(17),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.asset(
-                preset.assetPath,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF1B143F)),
-              ),
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Color(0xCC05060F)],
-                    stops: [0.4, 1.0],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (isSelected)
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Icon(CupertinoIcons.checkmark_circle_fill, size: 16, color: _acc(GlassTheme.bgNeonCyan)),
-                      )
-                    else
-                      const SizedBox(height: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          preset.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800),
-                        ),
-                        Text(
-                          preset.tag,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: GlassTheme.textMuted, fontSize: 8.5),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- GLASS QUALITY CARD (ADAPTIVE PERF TIERS) ---
-
-  Widget _buildGlassQualityCard() {
-    final perf = GlassPerfService.instance;
-    final isSober = perf.soberMode;
-    final resolved = perf.tierLabel;
-    final mem = perf.totalMemMb;
-
-    final cardContent = GlassContainer(
-      padding: const EdgeInsets.all(18),
-      borderRadius: 24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'GLASS QUALITY',
-                style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isSober
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSober
-                        ? Colors.white.withValues(alpha: 0.18)
-                        : _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.35),
-                  ),
-                ),
-                child: Text(
-                  isSober
-                      ? 'Disabled in Sober Mode'
-                      : (mem != null ? '$resolved • ${(mem / 1024).toStringAsFixed(1)}GB' : resolved),
-                  style: TextStyle(
-                    color: isSober ? Colors.white60 : _acc(GlassTheme.bgNeonCyan),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            isSober
-                ? 'Sober Mode uses solid high-contrast surfaces without GPU backdrop blur shaders. Turn off Sober Mode to configure live glass quality tiers.'
-                : 'Live backdrop blur is GPU-expensive (cost scales with sigma²). Every tier keeps live glass — only sigma changes. Auto picks Lite on ≤4GB devices; manual override applies instantly, no restart.',
-            style: const TextStyle(color: GlassTheme.textMuted, fontSize: 12),
-          ),
-          const SizedBox(height: 14),
-          _buildGlassOption(
-            GlassMode.auto,
-            'Auto (Active: $resolved)',
-            'RAM-aware default — Balanced, or Lite on low-memory devices',
-            enabled: !isSober,
-          ),
-          _buildGlassOption(
-            GlassMode.premium,
-            'Premium',
-            'Sigma 12 everywhere — flagships & desktop',
-            enabled: !isSober,
-          ),
-          _buildGlassOption(
-            GlassMode.high,
-            'High',
-            'Sigma 8 everywhere — smooth on most field phones',
-            enabled: !isSober,
-          ),
-          _buildGlassOption(
-            GlassMode.balanced,
-            'Balanced',
-            'Sigma 5 everywhere — the everyday sweet spot',
-            enabled: !isSober,
-          ),
-          _buildGlassOption(
-            GlassMode.lite,
-            'Lite',
-            'Sigma 2 everywhere — max fps & battery',
-            enabled: !isSober,
-          ),
-        ],
-      ),
-    );
-
-    if (isSober) {
-      return Opacity(
-        opacity: 0.40,
-        child: IgnorePointer(
-          child: cardContent,
-        ),
-      );
-    }
-    return cardContent;
-  }
-
-  Widget _buildGlassOption(GlassMode mode, String title, String subtitle, {bool enabled = true}) {
-    final perf = GlassPerfService.instance;
-    final isSelected = perf.mode == mode;
-    return GestureDetector(
-      onTap: enabled ? () => perf.setMode(mode) : null,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: (isSelected && enabled) ? _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: (isSelected && enabled) ? _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.12),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              isSelected ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
-              size: 16,
-              color: (isSelected && enabled) ? _acc(GlassTheme.bgNeonCyan) : GlassTheme.textMuted,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: enabled ? Colors.white : Colors.white54,
-                      fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    ),
-                  ),
-                  Text(subtitle, style: const TextStyle(color: GlassTheme.textMuted, fontSize: 11)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // --- SOBER MODE CARD (JUDGE-SAFE SKIN) ---
-
-  /// One-tap alternate skin for conservative judging panels / outdoor field
-  /// readability: solid dark surfaces, wallpaper off, notched nav + docked
-  /// scan FAB, pin-timeline checklist, saffron fee badges. Zero blur, so it
-  /// holds 60fps on any device with no tier involved. Selling line:
-  /// "high-contrast field mode for outdoor readability".
-  Widget _buildSoberModeCard() {
-    final perf = GlassPerfService.instance;
-    final sober = perf.soberMode;
-    return GlassContainer(
-      padding: const EdgeInsets.all(18),
-      borderRadius: 24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'SOBER MODE',
-                style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.bold),
-              ),
-              Switch.adaptive(
-                value: sober,
-                activeThumbColor: const Color(0xFFE8762B),
-                onChanged: (v) => perf.setSoberMode(v),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            sober ? 'Active — solid judge-safe skin, no blur anywhere.' : 'Off — full glassmorphism theme.',
-            style: const TextStyle(color: GlassTheme.textMuted, fontSize: 12),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Swaps wallpaper for flat dark, nav for the notched bar with docked scan button, clauses for the pin timeline, and fines for saffron badges. Applies instantly, survives restart.',
-            style: TextStyle(color: GlassTheme.textMuted, fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- DAEMON HOST CARD ---
-
-  /// Inspector one-shot unlock: the demoted one-shot controls on Inspect
-  /// stay hidden until this is enabled behind an explicit warning dialog.
-  /// Guided 4-step capture remains the primary flow either way.
-  Widget _buildOneShotUnlockCard() {
-    final perf = GlassPerfService.instance;
-    final unlocked = perf.oneShotUnlocked;
-    return ListenableBuilder(
-      listenable: perf,
-      builder: (context, _) => GlassContainer(
-        padding: const EdgeInsets.all(18),
-        borderRadius: 24,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'INSPECTOR QUICK SCAN',
-                  style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.bold),
-                ),
-                Switch.adaptive(
-                  value: GlassPerfService.instance.oneShotUnlocked,
-                  activeThumbColor: const Color(0xFFE8762B),
-                  onChanged: (v) {
-                    if (v) {
-                      _confirmOneShotUnlock();
-                    } else {
-                      GlassPerfService.instance.setOneShotUnlocked(false);
-                    }
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              unlocked
-                  ? 'Unlocked — one-shot controls visible on Inspect.'
-                  : 'Locked — Inspect shows guided capture only.',
-              style: const TextStyle(color: GlassTheme.textMuted, fontSize: 12),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _confirmOneShotUnlock() async {
-    final agreed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Enable inspector quick scan?'),
-        content: const Text(
-          'One-shot inspection skips step-by-step verification: wrong or incomplete photos are NOT rejected, and panel attribution is best-effort.\n\nGuided 4-step capture stays the recommended flow. Enable quick scan only if you frame complete declarations yourself.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('I understand — enable'),
-          ),
-        ],
-      ),
-    );
-    if (agreed == true && mounted) {
-      GlassPerfService.instance.setOneShotUnlocked(true);
-    }
-  }
-
-  // --- DAEMON HOST CARD ---
-
-  Widget _buildDaemonHostCard() {
-    return GlassContainer(
-      padding: const EdgeInsets.all(18),
-      borderRadius: 24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'INSPECTION DAEMON HOST',
-                style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.bold),
-              ),
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: _isHealthy == true
-                          ? GlassTheme.compliantCyan
-                          : _isHealthy == false
-                              ? GlassTheme.criticalCrimson
-                              : GlassTheme.moderateRiskAmber,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: (_isHealthy == true
-                                  ? GlassTheme.compliantCyan
-                                  : _isHealthy == false
-                                      ? GlassTheme.criticalCrimson
-                                      : GlassTheme.moderateRiskAmber)
-                              .withValues(alpha: 0.5),
-                          blurRadius: 6,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    _isChecking
-                        ? 'Pinging...'
-                        : _isHealthy == true
-                            ? 'ONLINE (CPU)'
-                            : 'OFFLINE',
-                    style: TextStyle(
-                      color: _isHealthy == true ? GlassTheme.compliantCyan : GlassTheme.textSecondary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-            ),
-            child: TextField(
-              controller: _urlController,
-              style: const TextStyle(color: Colors.white, fontSize: 13, fontFamily: 'monospace'),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                hintText: 'http://localhost:8080',
-                hintStyle: TextStyle(color: GlassTheme.textDim, fontSize: 13),
-              ),
-              onSubmitted: (_) => _testConnection(),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: [
-              _buildHostChip('USB ADB (localhost)', 'http://localhost:8080'),
-              _buildHostChip('LAN WiFi (192.168.1.92)', 'http://192.168.1.92:8080'),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Expanded(
-                child: Text(
-                  'For USB adb testing: adb reverse tcp:8080 tcp:8080',
-                  style: TextStyle(color: GlassTheme.textMuted, fontSize: 10),
-                ),
-              ),
-              const SizedBox(width: 8),
-              TextButton.icon(
-                onPressed: _testConnection,
-                icon: Icon(CupertinoIcons.bolt_fill, size: 12, color: _acc(GlassTheme.bgNeonCyan)),
-                label: const Text(
-                  'Connect / Test',
-                  style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHostChip(String label, String url) {
-    final isActive = _urlController.text.trim() == url;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _urlController.text = url;
-        });
-        _testConnection();
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: isActive ? _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isActive ? _acc(GlassTheme.bgNeonCyan) : Colors.white.withValues(alpha: 0.15),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isActive ? _acc(GlassTheme.bgNeonCyan) : GlassTheme.textMuted,
-            fontSize: 10.5,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- HARDWARE CONCURRENCY CARD ---
-
-  Widget _buildConcurrencyCard() {
-    return GlassContainer(
-      padding: const EdgeInsets.all(18),
-      borderRadius: 24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'HARDWARE CONCURRENCY PROFILE',
-            style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Controls multi-threaded batch inspection pooling across host CPU cores.',
-            style: TextStyle(color: GlassTheme.textMuted, fontSize: 12),
-          ),
-          const SizedBox(height: 14),
-          _buildRadioOption('5/6 Workers (~83%)', 'Recommended for desktop & server audit'),
-          _buildRadioOption('Full Power (100%)', 'Dedicated server execution'),
-          _buildRadioOption('1/2 Workers (50%)', 'Thermal-throttled edge laptops'),
-          _buildRadioOption('Single Thread (1.0)', 'Deterministic step-by-step debug'),
-        ],
-      ),
-    );
-  }
-
-  // --- MODEL TIER CARD ---
-
-  Widget _buildModelTierCard() {
-    return GlassContainer(
-      padding: const EdgeInsets.all(18),
-      borderRadius: 24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'AI VISION MODEL TIER',
-                style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.35)),
-                ),
-                child: Text(
-                  _selectedModelTier == EngineModelOption.mobileCompactInt8
-                      ? 'NATIVE (COMPACT)'
-                      : _selectedModelTier == EngineModelOption.mobileAccurateInt8
-                          ? 'NATIVE (ACCURATE)'
-                          : 'REMOTE (LAN/WAN)',
-                  style: TextStyle(
-                    color: _acc(GlassTheme.bgNeonCyan),
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Select on-device native edge neural network or remote LAN/WAN server backend.',
-            style: TextStyle(color: GlassTheme.textMuted, fontSize: 12),
-          ),
-          const SizedBox(height: 14),
-
-          // Option 1: Smaller / Fast (Mobile Native)
-          _buildModelTierOption(
-            option: EngineModelOption.mobileCompactInt8,
-            title: '1. Mobile Native Fast (Compact INT8 • ~3.1 MB)',
-            badge: 'EDGE NATIVE • OFFLINE',
-            subtitle: 'Ultra-lightweight MobileNetV3 / PP-OCRv3 INT8 on-device detector & recognizer. Sub-400ms latency, zero data transfer, 100% offline in basement godowns.',
-            executionType: 'Device ARM NEON • Zero Network',
-          ),
-
-          // Option 2: Bigger / High Accuracy (Mobile Native)
-          _buildModelTierOption(
-            option: EngineModelOption.mobileAccurateInt8,
-            title: '2. Mobile Native High-Accuracy (Accurate INT8 • ~27.3 MB)',
-            badge: 'EDGE NATIVE • HIGH RECALL',
-            subtitle: 'High-capacity DBNet + SVTR / PP-OCRv4 INT8 model executed natively on phone NPU / NNAPI. Maximum recall on curved bottles and faint dot-matrix dates.',
-            executionType: 'Device NPU / NNAPI • Zero Network',
-          ),
-
-          // Option 3: Server one (Remote LAN/WAN)
-          _buildModelTierOption(
-            option: EngineModelOption.remoteServer,
-            title: '3. Remote Themis Server (LAN / WAN Daemon)',
-            badge: 'REMOTE WORKSTATION • MULTI-CORE',
-            subtitle: 'Delegates inference over LAN/WAN Wi-Fi to central Rust backend. Full FP32 precision, multi-worker thread pooling, and high-throughput batch audits.',
-            executionType: 'Rust Axum Daemon • LAN / WAN',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRemoteDisconnectedNotice() {
-    return GlassContainer(
-      padding: const EdgeInsets.all(16),
-      borderRadius: 20,
-      child: Row(
-        children: [
-          Icon(CupertinoIcons.wifi_slash, size: 20, color: GlassTheme.moderateRiskAmber),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              'Hardware concurrency profiling is managed on the host daemon. Connect to your LAN/WAN server to view and configure worker allocation.',
-              style: TextStyle(color: GlassTheme.textMuted, fontSize: 11.5, height: 1.3),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- DIAGNOSTICS CARD ---
-
-  Widget _buildDiagnosticsCard() {
-    return GlassContainer(
-      padding: const EdgeInsets.all(18),
-      borderRadius: 24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'DIAGNOSTICS & TELEMETRY',
-                style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.bold),
-              ),
-              Icon(CupertinoIcons.chevron_left_slash_chevron_right, color: _acc(GlassTheme.bgNeonCyan), size: 16),
-            ],
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Live execution traces, ONNX model pipeline logs, HTTP network traces, and clipboard export.',
-            style: TextStyle(color: GlassTheme.textMuted, fontSize: 12),
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const DevLogsScreen()),
-                );
-              },
-              icon: const Icon(CupertinoIcons.chevron_left_slash_chevron_right, size: 14, color: Colors.black),
-              label: const Text(
-                'Open Developer Logs Console',
-                style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.w800),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- INSPECTOR PROFILE CARD ---
-
-  Widget _buildInspectorProfileCard() {
-    return GlassContainer(
-      padding: const EdgeInsets.all(18),
-      borderRadius: 24,
-      child: Row(
-        children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0x3300F2FE), Color(0x330072FF)],
-              ),
-              shape: BoxShape.circle,
-              border: Border.all(color: _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.4)),
-            ),
-            child: const Icon(CupertinoIcons.person_fill, color: Colors.white, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
+          // ===============================================================
+          // 1. Officer Profile & Jurisdiction
+          // ===============================================================
+          _buildCard(
+            title: 'OFFICER IDENTITY & JURISDICTION',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'INSPECTOR ID: #DOCA-2026-894',
-                  style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: ThemisTheme.amberTint,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: ThemisTheme.amberPrimary.withValues(alpha: 0.3)),
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.person_crop_circle_fill,
+                        size: 28,
+                        color: ThemisTheme.amberPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: ThemisTheme.space12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'Inspector Rajesh Sharma',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: ThemisTheme.sunlightTextPrimary,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Badge: DLM-MH-4091  •  Senior Enforcement Officer',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: ThemisTheme.sunlightTextSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 2),
-                Text(
-                  'Role: Directorate Enforcement Officer',
-                  style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11),
+                const SizedBox(height: ThemisTheme.space12),
+                const Divider(height: 1, color: ThemisTheme.sunlightBorder),
+                const SizedBox(height: ThemisTheme.space12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text('Assigned Circle:', style: TextStyle(fontSize: 12, color: ThemisTheme.sunlightTextSecondary)),
+                    Text('Circle 4 (Central Enforcement)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: ThemisTheme.sunlightTextPrimary)),
+                  ],
                 ),
-                SizedBox(height: 2),
-                Text(
-                  'HMAC-SHA256 JWT Authenticated',
-                  style: TextStyle(
-                    color: GlassTheme.compliantCyan,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                  ),
+                const SizedBox(height: ThemisTheme.space4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text('Statutory Authority:', style: TextStyle(fontSize: 12, color: ThemisTheme.sunlightTextSecondary)),
+                    Text('Legal Metrology Act, 2009', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: ThemisTheme.amberHover)),
+                  ],
                 ),
               ],
             ),
           ),
+
+          const SizedBox(height: ThemisTheme.space16),
+
+          // ===============================================================
+          // 2. AI Execution Architecture & Model Tier Selector
+          // ===============================================================
+          _buildCard(
+            title: 'AI EXECUTION TIER & COMPLIANCE ENGINE',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Select the inference tier for OCR extraction, multi-panel aggregation, and statutory rule evaluation:',
+                  style: TextStyle(fontSize: 12.5, color: ThemisTheme.sunlightTextSecondary, height: 1.4),
+                ),
+                const SizedBox(height: ThemisTheme.space12),
+
+                _buildModelOption(
+                  option: EngineModelOption.mobileCompactInt8,
+                  title: 'On-Device Compact INT8 (Recommended)',
+                  badge: 'OFFLINE • 180ms',
+                  badgeColor: ThemisTheme.statusCompliant,
+                  description: 'Zero network latency, 100% offline edge processing. Powered by native Rust FFI bindings for low power consumption.',
+                ),
+                const SizedBox(height: ThemisTheme.space8),
+                _buildModelOption(
+                  option: EngineModelOption.mobileAccurateInt8,
+                  title: 'On-Device High Precision INT8',
+                  badge: 'ACCURATE • 420ms',
+                  badgeColor: ThemisTheme.amberPrimary,
+                  description: 'Enhanced micro-print font height verification and complex bilingual (Hindi + English) declaration parsing.',
+                ),
+                const SizedBox(height: ThemisTheme.space8),
+                _buildModelOption(
+                  option: EngineModelOption.remoteServer,
+                  title: 'Remote Daemon / High-Throughput Server',
+                  badge: 'SERVER • RAYON',
+                  badgeColor: const Color(0xFF38BDF8),
+                  description: 'Offloads processing to an external enterprise server with 64 Rayon threadpool workers for mass bulk SKU auditing.',
+                ),
+              ],
+            ),
+          ),
+
+          // Conditional Remote Daemon Configuration Card
+          if (_selectedModelTier == EngineModelOption.remoteServer) ...[
+            const SizedBox(height: ThemisTheme.space16),
+            _buildCard(
+              title: 'REMOTE DAEMON ENDPOINT',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _urlController,
+                          style: const TextStyle(fontSize: 13, color: ThemisTheme.sunlightTextPrimary),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(ThemisTheme.radius8),
+                              borderSide: const BorderSide(color: ThemisTheme.sunlightBorder),
+                            ),
+                            hintText: 'http://192.168.1.100:8080',
+                            hintStyle: const TextStyle(fontSize: 13, color: ThemisTheme.sunlightTextMuted),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: ThemisTheme.space8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ThemisTheme.amberPrimary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ThemisTheme.radius8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        ),
+                        onPressed: _isChecking ? null : _testConnection,
+                        child: _isChecking
+                            ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : const Text('Test', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: ThemisTheme.space12),
+
+                  Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _isHealthy == true
+                              ? ThemisTheme.statusCompliant
+                              : (_isHealthy == false ? ThemisTheme.statusViolation : ThemisTheme.sunlightTextMuted),
+                        ),
+                      ),
+                      const SizedBox(width: ThemisTheme.space8),
+                      Text(
+                        _isChecking
+                            ? 'Pinging server health probe...'
+                            : (_isHealthy == true
+                                ? 'Server Online: /health 200 OK'
+                                : (_isHealthy == false ? 'Connection Failed: Offline / Unreachable' : 'Untested')),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: _isHealthy == true
+                              ? ThemisTheme.statusCompliant
+                              : (_isHealthy == false ? ThemisTheme.statusViolation : ThemisTheme.sunlightTextSecondary),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: ThemisTheme.space12),
+
+                  const Text('Quick Host Presets:', style: TextStyle(fontSize: 11, color: ThemisTheme.sunlightTextMuted)),
+                  const SizedBox(height: ThemisTheme.space4),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      _buildHostChip('Localhost:8080', 'http://127.0.0.1:8080'),
+                      _buildHostChip('Android Emulator', 'http://10.0.2.2:8080'),
+                      _buildHostChip('LAN Server', 'http://192.168.1.100:8080'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          const SizedBox(height: ThemisTheme.space16),
+
+          // ===============================================================
+          // 3. Statutory Ruleset & Legal Framework
+          // ===============================================================
+          _buildCard(
+            title: 'STATUTORY FRAMEWORK & RULES',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildStatutoryItem(
+                  rule: 'Rule 6(1)(a) – (g)',
+                  title: 'Packaged Commodities Rules, 2011',
+                  desc: 'Mandates Commodity Name, MRP, USP, Net Qty, Mfg Date, Packer Info, and Consumer Care on Principal Display Panel.',
+                ),
+                const SizedBox(height: ThemisTheme.space8),
+                _buildStatutoryItem(
+                  rule: 'Schedule II',
+                  title: 'Minimum Numerals & Letters Height',
+                  desc: 'Enforces statutory font height scaling from 1.0mm (≤50g) up to 6.0mm (>4kg) based on net quantity package area.',
+                ),
+                const SizedBox(height: ThemisTheme.space8),
+                _buildStatutoryItem(
+                  rule: 'Jan Vishwas 2023',
+                  title: 'Compounding & Decriminalization',
+                  desc: 'Sec 49 compounding schedule applies standard monetary penalties without court prosecution for first-time non-willful omissions.',
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: ThemisTheme.space16),
+
+          // ===============================================================
+          // 4. Local Storage & Diagnostics Maintenance
+          // ===============================================================
+          _buildCard(
+            title: 'DIAGNOSTICS & SYSTEM MAINTENANCE',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Local Inspection Dossiers:', style: TextStyle(fontSize: 13, color: ThemisTheme.sunlightTextSecondary)),
+                    Text(
+                      '$localCount Audits',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: ThemisTheme.sunlightTextPrimary),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: ThemisTheme.space12),
+
+                ThemisButton(
+                  label: 'View Developer & Native FFI Logs',
+                  leadingIcon: Icons.terminal,
+                  variant: ThemisButtonVariant.secondaryOutline,
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const DevLogsScreen()));
+                  },
+                ),
+                const SizedBox(height: ThemisTheme.space8),
+                ThemisButton(
+                  label: 'Purge Local Dossier Cache',
+                  leadingIcon: CupertinoIcons.trash,
+                  variant: ThemisButtonVariant.dangerCrimson,
+                  onPressed: _confirmClearCache,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: ThemisTheme.space24),
+
+          // App build identity footer
+          Center(
+            child: Column(
+              children: const [
+                Text(
+                  'THEMIS // DIRECTORATE OF LEGAL METROLOGY',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: ThemisTheme.sunlightTextMuted),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'v2.4.0-prod (Rust Core Native FFI • On-Device Neural Engine)',
+                  style: TextStyle(fontSize: 10, color: ThemisTheme.sunlightTextMuted),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: ThemisTheme.space20),
         ],
       ),
     );
   }
 
-  Widget _buildRadioOption(String title, String subtitle) {
-    final isSelected = _selectedProfile == title;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedProfile = title),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSelected ? _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.12),
+  Widget _buildCard({required String title, required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(ThemisTheme.space16),
+      decoration: BoxDecoration(
+        color: ThemisTheme.sunlightSurface,
+        borderRadius: BorderRadius.circular(ThemisTheme.radius12),
+        border: Border.all(color: ThemisTheme.sunlightBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              isSelected ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
-              size: 16,
-              color: isSelected ? _acc(GlassTheme.bgNeonCyan) : GlassTheme.textMuted,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+              color: ThemisTheme.sunlightTextSecondary,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    ),
-                  ),
-                  Text(subtitle, style: const TextStyle(color: GlassTheme.textMuted, fontSize: 11)),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: ThemisTheme.space12),
+          child,
+        ],
       ),
     );
   }
 
-  Widget _buildModelTierOption({
+  Widget _buildModelOption({
     required EngineModelOption option,
     required String title,
     required String badge,
-    required String subtitle,
-    required String executionType,
+    required Color badgeColor,
+    required String description,
   }) {
     final isSelected = _selectedModelTier == option;
-    return GestureDetector(
+
+    return InkWell(
       onTap: () => _onModelTierChanged(option),
+      borderRadius: BorderRadius.circular(ThemisTheme.radius8),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(ThemisTheme.space12),
         decoration: BoxDecoration(
-          color: isSelected ? _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          color: isSelected ? ThemisTheme.amberTint.withValues(alpha: 0.5) : ThemisTheme.sunlightBg,
+          borderRadius: BorderRadius.circular(ThemisTheme.radius8),
           border: Border.all(
-            color: isSelected ? _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.12),
+            color: isSelected ? ThemisTheme.amberPrimary : ThemisTheme.sunlightBorder,
             width: isSelected ? 1.5 : 1.0,
           ),
         ),
@@ -1239,79 +502,114 @@ class _EngineScreenState extends State<EngineScreen> {
                 Icon(
                   isSelected ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
                   size: 18,
-                  color: isSelected ? _acc(GlassTheme.bgNeonCyan) : GlassTheme.textMuted,
+                  color: isSelected ? ThemisTheme.amberPrimary : ThemisTheme.sunlightTextMuted,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: ThemisTheme.space8),
                 Expanded(
                   child: Text(
                     title,
                     style: TextStyle(
-                      color: Colors.white,
                       fontSize: 13,
                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                      color: ThemisTheme.sunlightTextPrimary,
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.2)
-                        : Colors.white.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isSelected
-                          ? _acc(GlassTheme.bgNeonCyan).withValues(alpha: 0.4)
-                          : Colors.white.withValues(alpha: 0.1),
-                    ),
+                    color: badgeColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(ThemisTheme.radius4),
                   ),
                   child: Text(
                     badge,
                     style: TextStyle(
-                      color: isSelected ? _acc(GlassTheme.bgNeonCyan) : GlassTheme.textMuted,
-                      fontSize: 8.5,
+                      fontSize: 9,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
+                      color: badgeColor,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: ThemisTheme.space8),
             Padding(
-              padding: const EdgeInsets.only(left: 28),
+              padding: const EdgeInsets.only(left: 26),
               child: Text(
-                subtitle,
-                style: const TextStyle(color: GlassTheme.textMuted, fontSize: 11.5, height: 1.3),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.only(left: 28),
-              child: Row(
-                children: [
-                  Icon(
-                    option == EngineModelOption.remoteServer
-                        ? CupertinoIcons.wifi
-                        : Icons.memory,
-                    size: 13,
-                    color: isSelected ? _acc(GlassTheme.bgNeonCyan) : GlassTheme.textDim,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    executionType,
-                    style: TextStyle(
-                      color: isSelected ? _acc(GlassTheme.bgNeonCyan) : GlassTheme.textDim,
-                      fontSize: 10,
-                      fontFamily: 'monospace',
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+                description,
+                style: const TextStyle(fontSize: 11.5, color: ThemisTheme.sunlightTextSecondary, height: 1.35),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHostChip(String label, String url) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _urlController.text = url;
+        });
+        _testConnection();
+      },
+      borderRadius: BorderRadius.circular(ThemisTheme.radius4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: ThemisTheme.sunlightBg,
+          borderRadius: BorderRadius.circular(ThemisTheme.radius4),
+          border: Border.all(color: ThemisTheme.sunlightBorder),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: ThemisTheme.sunlightTextSecondary),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatutoryItem({required String rule, required String title, required String desc}) {
+    return Container(
+      padding: const EdgeInsets.all(ThemisTheme.space8),
+      decoration: BoxDecoration(
+        color: ThemisTheme.sunlightBg,
+        borderRadius: BorderRadius.circular(ThemisTheme.radius8),
+        border: Border.all(color: ThemisTheme.sunlightBorder),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: ThemisTheme.amberTint,
+              borderRadius: BorderRadius.circular(ThemisTheme.radius4),
+            ),
+            child: Text(
+              rule,
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: ThemisTheme.amberHover),
+            ),
+          ),
+          const SizedBox(width: ThemisTheme.space8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: ThemisTheme.sunlightTextPrimary),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  desc,
+                  style: const TextStyle(fontSize: 11, color: ThemisTheme.sunlightTextSecondary, height: 1.3),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

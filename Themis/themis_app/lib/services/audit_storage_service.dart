@@ -293,4 +293,25 @@ class AuditStorageService extends ChangeNotifier {
           .toList(),
     };
   }
+
+  /// Clears all local inspection records and cached JSON reports.
+  Future<void> clearAll() async {
+    await ensureInitialized();
+    try {
+      _reportCache.clear();
+      _index.clear();
+      if (_storageDir != null) {
+        final indexFile = File('${_storageDir!.path}/registry_index.json');
+        if (await indexFile.exists()) await indexFile.delete();
+        final reportsDir = Directory('${_storageDir!.path}/reports');
+        if (await reportsDir.exists()) {
+          await reportsDir.delete(recursive: true);
+          await reportsDir.create(recursive: true);
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      DevLogger.instance.error('STORAGE', 'Failed to clear audits: $e');
+    }
+  }
 }
