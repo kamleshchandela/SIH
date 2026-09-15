@@ -1,42 +1,51 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:themis_app/main.dart';
-import 'package:themis_app/services/glass_perf_service.dart';
-import 'package:themis_app/widgets/sober/sober_bottom_bar.dart';
+import 'package:themis_app/screens/home_screen.dart';
+import 'package:themis_app/widgets/primitives/themis_primitives.dart';
 
 void main() {
-  testWidgets('ThemisApp renders navigation bar and dashboard by default', (WidgetTester tester) async {
+  testWidgets('ThemisApp renders navigation bar and home screen by default', (WidgetTester tester) async {
     await tester.pumpWidget(const ThemisApp());
     await tester.pump(const Duration(milliseconds: 300));
 
-    // By default, sober bottom bar is rendered with navigation icons
-    expect(find.byType(SoberBottomBar), findsOneWidget);
-    expect(find.descendant(of: find.byType(SoberBottomBar), matching: find.byIcon(CupertinoIcons.house_fill)), findsOneWidget);
-    expect(find.descendant(of: find.byType(SoberBottomBar), matching: find.byIcon(CupertinoIcons.calendar)), findsOneWidget);
-    expect(find.descendant(of: find.byType(SoberBottomBar), matching: find.byIcon(CupertinoIcons.folder_fill)), findsOneWidget);
-    expect(find.descendant(of: find.byType(SoberBottomBar), matching: find.byIcon(CupertinoIcons.gear_alt_fill)), findsOneWidget);
+    // Home screen renders with statutory app bar
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(ThemisAppBar), findsOneWidget);
+
+    // Primary Guided Scan CTA is displayed prominently
+    expect(find.text('START GUIDED SCAN (4 STEPS)'), findsOneWidget);
+
+    // Navigation bar with 4 core tabs
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Dossiers'), findsOneWidget);
+    expect(find.text('Insights'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
+
+    // Navigation icons
+    expect(find.byIcon(CupertinoIcons.house_fill), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.folder), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.chart_pie), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.gear_alt), findsOneWidget);
   });
 
-  testWidgets('Glass mode renders glass navigation bar and inspection tabs', (WidgetTester tester) async {
-    // Switch to glass mode to test glass navigation and scan tab selectors
-    GlassPerfService.instance.setSoberMode(false);
-
+  testWidgets('ThemisApp bottom navigation switches tabs correctly', (WidgetTester tester) async {
     await tester.pumpWidget(const ThemisApp());
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('INSPECT'), findsOneWidget);
-    expect(find.text('Single Panel'), findsOneWidget);
-    expect(find.text('Full SKU (Multi)'), findsOneWidget);
-    expect(find.text('Server Path'), findsOneWidget);
-
-    // Switch to Full SKU (Multi)
-    await tester.tap(find.text('Full SKU (Multi)'));
+    // Switch to Insights (Supervisor Dashboard)
+    await tester.tap(find.text('Insights'));
     await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('NATIONAL INTELLIGENCE'), findsOneWidget);
 
-    expect(find.text('Multi-Panel Pooled SKU Audit'), findsOneWidget);
-    expect(find.text('PRODUCT SKU NAME (OPTIONAL)'), findsOneWidget);
+    // Switch to Settings (Engine & Diagnostics)
+    await tester.tap(find.text('Settings'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('ENGINE & CONFIGURATION'), findsOneWidget);
 
-    // Switch back to sober mode to restore baseline state
-    GlassPerfService.instance.setSoberMode(true);
+    // Switch back to Home
+    await tester.tap(find.text('Home'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('START GUIDED SCAN (4 STEPS)'), findsOneWidget);
   });
 }

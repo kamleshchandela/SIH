@@ -67,7 +67,6 @@ class ThemisButton extends StatelessWidget {
       height: height,
       child: Material(
         color: bg,
-        borderRadius: BorderRadius.circular(ThemisTheme.radius12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(ThemisTheme.radius12),
           side: border,
