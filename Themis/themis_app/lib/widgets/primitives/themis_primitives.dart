@@ -405,12 +405,16 @@ class ThemisAppBar extends StatelessWidget implements PreferredSizeWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          title,
-                          style: ThemisTheme.titleMedium.copyWith(
-                            color: titleColor,
-                            letterSpacing: 1.2,
-                            fontWeight: FontWeight.w700,
+                        Flexible(
+                          child: Text(
+                            title,
+                            style: ThemisTheme.titleMedium.copyWith(
+                              color: titleColor,
+                              letterSpacing: 0.8,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: ThemisTheme.space8),
