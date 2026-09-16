@@ -110,10 +110,8 @@ class _ProcessingScreenState extends State<ProcessingScreen> {
       child: Scaffold(
         backgroundColor: ThemisTheme.sunlightBg,
         appBar: const ThemisAppBar(
-          title: 'AUDIT IN PROGRESS',
+          title: 'GUIDED CAPTURE',
           subtitle: 'Legal Metrology Compliance Engine',
-          roleBadge: 'PROCESSING',
-          isOffline: true,
         ),
         body: SafeArea(
           child: Padding(

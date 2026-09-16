@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../theme/theme.dart';
+import '../../services/themis_api.dart';
 
 // =============================================================================
 // 1. ThemisButton — High-Contrast Accessible Action Target (48dp / 56dp)
@@ -350,8 +351,6 @@ class SectionCard extends StatelessWidget {
 class ThemisAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final String? subtitle;
-  final String roleBadge;
-  final bool isOffline;
   final List<Widget>? actions;
   final bool isDark;
 
@@ -359,8 +358,6 @@ class ThemisAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.title = 'THEMIS',
     this.subtitle = 'Directorate of Legal Metrology',
-    this.roleBadge = 'INSPECTOR',
-    this.isOffline = false,
     this.actions,
     this.isDark = false,
   });
@@ -370,6 +367,9 @@ class ThemisAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isOffline = ThemisApiService().modelOption != EngineModelOption.remoteServer;
+    final String roleBadge = 'FIELD OFFICER';
+
     final bg = isDark ? ThemisTheme.darkSlateBg : ThemisTheme.sunlightSurface;
     final border = isDark ? ThemisTheme.darkSlateBorder : ThemisTheme.sunlightBorder;
     final titleColor = isDark ? ThemisTheme.darkSlateTextPrimary : ThemisTheme.sunlightTextPrimary;

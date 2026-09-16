@@ -153,8 +153,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
         appBar: ThemisAppBar(
           title: 'AUDIT VERDICT',
           subtitle: report.productName ?? 'Commodity Inspection',
-          roleBadge: 'OFFICIAL RECORD',
-          isOffline: true,
           actions: [
             IconButton(
               icon: const Icon(CupertinoIcons.share, size: 20, color: ThemisTheme.sunlightTextSecondary),

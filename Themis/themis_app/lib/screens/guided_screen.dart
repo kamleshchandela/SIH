@@ -214,10 +214,8 @@ class _GuidedScreenState extends State<GuidedScreen> {
       child: Scaffold(
         backgroundColor: ThemisTheme.sunlightBg,
         appBar: ThemisAppBar(
-          title: 'GUIDED INSPECTION',
+          title: 'GUIDED CAPTURE',
           subtitle: 'Step ${_currentStepIndex + 1} of 4: ${stepDef.title}',
-          roleBadge: 'ACTIVE SESSION',
-          isOffline: true,
           actions: [
             IconButton(
               icon: const Icon(CupertinoIcons.stop_circle, size: 22, color: ThemisTheme.statusViolation),

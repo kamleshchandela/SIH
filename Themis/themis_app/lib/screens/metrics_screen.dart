@@ -113,11 +113,9 @@ class _MetricsScreenState extends State<MetricsScreen> {
       child: Scaffold(
         backgroundColor: ThemisTheme.darkSlateBg,
         appBar: ThemisAppBar(
-          title: 'NATIONAL INTELLIGENCE',
+          title: 'INSIGHTS',
           subtitle: 'Directorate of Legal Metrology - Market Surveillance',
-          roleBadge: 'SUPERVISOR',
           isDark: true,
-          isOffline: false,
           actions: [
             IconButton(
               icon: _isLoading
@@ -137,13 +135,8 @@ class _MetricsScreenState extends State<MetricsScreen> {
             // ===============================================================
             // 1. Headline Benchmark Insight: Cap & Crimp Gap Analysis
             // ===============================================================
-            Container(
-              padding: const EdgeInsets.all(ThemisTheme.space16),
-              decoration: BoxDecoration(
-                color: ThemisTheme.darkSlateSurface,
-                borderRadius: BorderRadius.circular(ThemisTheme.radius12),
-                border: Border.all(color: ThemisTheme.amberPrimary.withValues(alpha: 0.35)),
-              ),
+            SectionCard(
+              isDark: true,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -153,7 +146,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
                       const SizedBox(width: ThemisTheme.space8),
                       const Expanded(
                         child: Text(
-                          'STATUTORY BLIND-SPOT INTELLIGENCE',
+                          'Statutory Blind-Spot Intelligence',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -203,7 +196,9 @@ class _MetricsScreenState extends State<MetricsScreen> {
                   child: MetricCard(
                     label: 'Commodities Audited',
                     value: '$displayTotal',
-                    subtitle: 'Multi-panel SKU pooled',
+                    subtitle: (totalLocal == 0 && (remoteTotal == null || remoteTotal == 0)) 
+                        ? '(Illustrative Benchmark)' 
+                        : 'Multi-panel SKU pooled',
                     icon: CupertinoIcons.cube_box_fill,
                     isDark: true,
                   ),
@@ -228,7 +223,9 @@ class _MetricsScreenState extends State<MetricsScreen> {
                   child: MetricCard(
                     label: 'Compounding Liabilities',
                     value: 'Rs. ${(displayPenalties / 100000).toStringAsFixed(1)}L',
-                    subtitle: 'Sec 49 compounded fines',
+                    subtitle: (totalLocal == 0 && (remoteTotal == null || remoteTotal == 0)) 
+                        ? '(Illustrative Benchmark)' 
+                        : 'Sec 49 compounded fines',
                     icon: CupertinoIcons.money_dollar_circle_fill,
                     accentColor: ThemisTheme.amberLight,
                     isDark: true,
@@ -262,7 +259,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'STATUTORY RISK-TIER DISTRIBUTION',
+                        'Statutory Risk-Tier Distribution',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -315,7 +312,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'VIOLATIONS BY STATUTORY CLAUSE',
+                    'Violations by Statutory Clause',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -357,7 +354,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
                       Text(
-                        'MARKET SURVEILLANCE TREND',
+                        'Market Surveillance Trend',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,

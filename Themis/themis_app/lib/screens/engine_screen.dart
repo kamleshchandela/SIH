@@ -123,12 +123,10 @@ class _EngineScreenState extends State<EngineScreen> {
 
     return Scaffold(
       backgroundColor: ThemisTheme.sunlightBg,
-      appBar: ThemisAppBar(
-        title: 'ENGINE & CONFIGURATION',
+      appBar: const ThemisAppBar(
+        title: 'ENGINE & SETTINGS',
         subtitle: 'Directorate of Legal Metrology - System Administration',
-        roleBadge: 'ADMIN / OFFICER',
         isDark: false,
-        isOffline: false,
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(

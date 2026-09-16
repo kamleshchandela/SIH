@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../services/audit_storage_service.dart';
-import '../services/themis_api.dart';
 import '../theme/theme.dart';
 import '../widgets/primitives/themis_primitives.dart';
 import 'guided_screen.dart';
@@ -21,7 +20,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ThemisApiService _api = ThemisApiService();
   final AuditStorageService _storage = AuditStorageService.instance;
 
   @override
@@ -87,8 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: ThemisAppBar(
           title: 'THEMIS',
           subtitle: 'Directorate of Legal Metrology',
-          roleBadge: 'INSPECTOR',
-          isOffline: _api.modelOption != EngineModelOption.remoteServer,
           actions: [
             IconButton(
               icon: const Icon(CupertinoIcons.bell, size: 20, color: ThemisTheme.sunlightTextSecondary),
