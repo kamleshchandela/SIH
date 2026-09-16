@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../theme/theme.dart';
 import '../../services/themis_api.dart';
+import '../../theme/theme_notifier.dart';
 
 // =============================================================================
 // 1. ThemisButton — High-Contrast Accessible Action Target (48dp / 56dp)
@@ -20,7 +21,6 @@ class ThemisButton extends StatelessWidget {
   final ThemisButtonVariant variant;
   final bool isPrimaryCTA;
   final bool isLoading;
-  final bool isDark;
 
   const ThemisButton({
     super.key,
@@ -30,11 +30,11 @@ class ThemisButton extends StatelessWidget {
     this.variant = ThemisButtonVariant.primaryAmber,
     this.isPrimaryCTA = false,
     this.isLoading = false,
-    this.isDark = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final height = isPrimaryCTA ? ThemisTheme.primaryTouchTarget : ThemisTheme.minTouchTarget;
 
     Color bg;
@@ -126,17 +126,16 @@ enum StatutoryStatus {
 class StatutoryBadge extends StatelessWidget {
   final StatutoryStatus status;
   final String? customLabel;
-  final bool isDark;
 
   const StatutoryBadge({
     super.key,
     required this.status,
     this.customLabel,
-    this.isDark = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Color bg;
     Color fg;
     Color border;
@@ -212,7 +211,6 @@ class MetricCard extends StatelessWidget {
   final String? subtitle;
   final IconData? icon;
   final Color? accentColor;
-  final bool isDark;
 
   const MetricCard({
     super.key,
@@ -221,11 +219,11 @@ class MetricCard extends StatelessWidget {
     this.subtitle,
     this.icon,
     this.accentColor,
-    this.isDark = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? ThemisTheme.darkSlateSurface : ThemisTheme.sunlightSurface;
     final border = isDark ? ThemisTheme.darkSlateBorder : ThemisTheme.sunlightBorder;
     final titleColor = isDark ? ThemisTheme.darkSlateTextSecondary : ThemisTheme.sunlightTextSecondary;
@@ -296,7 +294,6 @@ class MetricCard extends StatelessWidget {
 class SectionCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
-  final bool isDark;
   final VoidCallback? onTap;
   final BorderSide? borderOverride;
 
@@ -304,13 +301,13 @@ class SectionCard extends StatelessWidget {
     super.key,
     required this.child,
     this.padding,
-    this.isDark = false,
     this.onTap,
     this.borderOverride,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? ThemisTheme.darkSlateSurface : ThemisTheme.sunlightSurface;
     final border = borderOverride ??
         BorderSide(
@@ -352,14 +349,12 @@ class ThemisAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final String? subtitle;
   final List<Widget>? actions;
-  final bool isDark;
 
   const ThemisAppBar({
     super.key,
     this.title = 'THEMIS',
     this.subtitle = 'Directorate of Legal Metrology',
     this.actions,
-    this.isDark = false,
   });
 
   @override
@@ -367,6 +362,7 @@ class ThemisAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final bool isOffline = ThemisApiService().modelOption != EngineModelOption.remoteServer;
     final String roleBadge = 'FIELD OFFICER';
 
@@ -492,6 +488,15 @@ class ThemisAppBar extends StatelessWidget implements PreferredSizeWidget {
                 const SizedBox(width: ThemisTheme.space8),
                 ...actions!,
               ],
+              IconButton(
+                icon: Icon(
+                  isDark ? CupertinoIcons.sun_max_fill : CupertinoIcons.moon_fill,
+                  size: 20,
+                  color: isDark ? ThemisTheme.darkSlateTextSecondary : ThemisTheme.sunlightTextSecondary,
+                ),
+                onPressed: ThemeNotifier.toggle,
+                tooltip: 'Toggle Theme',
+              ),
             ],
           ),
         ),

@@ -6,6 +6,7 @@ import 'screens/home_screen.dart';
 import 'screens/metrics_screen.dart';
 import 'services/audit_storage_service.dart';
 import 'theme/theme.dart';
+import 'theme/theme_notifier.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,13 +19,18 @@ class ThemisApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Themis — Legal Metrology Compliance Inspector',
-      debugShowCheckedModeBanner: false,
-      theme: ThemisTheme.sunlightTheme,
-      darkTheme: ThemisTheme.darkSlateTheme,
-      themeMode: ThemeMode.light, // Sunlight Light Theme default for field operations
-      home: const MainNavigationShell(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeNotifier.mode,
+      builder: (context, currentMode, _) {
+        return MaterialApp(
+          title: 'Themis — Legal Metrology Compliance Inspector',
+          debugShowCheckedModeBanner: false,
+          theme: ThemisTheme.sunlightTheme,
+          darkTheme: ThemisTheme.darkSlateTheme,
+          themeMode: currentMode,
+          home: const MainNavigationShell(),
+        );
+      },
     );
   }
 }
@@ -44,33 +50,26 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   late final List<Widget> _screens = [
     HomeScreen(onNavigateTab: _openTab),
     const DossierScreen(),
-    // Dashboard screen wrapped in Dark Slate Theme per design specification
-    Theme(
-      data: ThemisTheme.darkSlateTheme,
-      child: const Scaffold(
-        backgroundColor: ThemisTheme.darkSlateBg,
-        body: MetricsScreen(),
-      ),
-    ),
+    const MetricsScreen(),
     const EngineScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final isDarkTab = _currentIndex == 2; // Insights/Dashboard is dark slate
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkTab ? ThemisTheme.darkSlateBg : ThemisTheme.sunlightBg,
+      backgroundColor: isDark ? ThemisTheme.darkSlateBg : ThemisTheme.sunlightBg,
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: isDarkTab ? ThemisTheme.darkSlateSurface : ThemisTheme.sunlightSurface,
+          color: isDark ? ThemisTheme.darkSlateSurface : ThemisTheme.sunlightSurface,
           border: Border(
             top: BorderSide(
-              color: isDarkTab ? ThemisTheme.darkSlateBorder : ThemisTheme.sunlightBorder,
+              color: isDark ? ThemisTheme.darkSlateBorder : ThemisTheme.sunlightBorder,
               width: 1,
             ),
           ),
@@ -87,28 +86,28 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
                   icon: CupertinoIcons.house,
                   activeIcon: CupertinoIcons.house_fill,
                   label: 'Home',
-                  isDark: isDarkTab,
+                  isDark: isDark,
                 ),
                 _buildNavItem(
                   index: 1,
                   icon: CupertinoIcons.folder,
                   activeIcon: CupertinoIcons.folder_fill,
                   label: 'Dossiers',
-                  isDark: isDarkTab,
+                  isDark: isDark,
                 ),
                 _buildNavItem(
                   index: 2,
                   icon: CupertinoIcons.chart_pie,
                   activeIcon: CupertinoIcons.chart_pie_fill,
                   label: 'Insights',
-                  isDark: isDarkTab,
+                  isDark: isDark,
                 ),
                 _buildNavItem(
                   index: 3,
                   icon: CupertinoIcons.gear_alt,
                   activeIcon: CupertinoIcons.gear_alt_fill,
                   label: 'Settings',
-                  isDark: isDarkTab,
+                  isDark: isDark,
                 ),
               ],
             ),

@@ -352,7 +352,6 @@ class _DossierScreenState extends State<DossierScreen> {
       appBar: ThemisAppBar(
         title: 'AUDIT DOSSIER',
         subtitle: 'Directorate of Legal Metrology - Inspection History',
-        isDark: false,
         actions: [
           IconButton(
             icon: _isLoading

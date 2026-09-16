@@ -125,8 +125,7 @@ class _EngineScreenState extends State<EngineScreen> {
       backgroundColor: ThemisTheme.sunlightBg,
       appBar: const ThemisAppBar(
         title: 'ENGINE & SETTINGS',
-        subtitle: 'Directorate of Legal Metrology - System Administration',
-        isDark: false,
+        subtitle: 'AI Runtime & Model Configuration',
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(
