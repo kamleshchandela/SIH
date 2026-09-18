@@ -1,6 +1,6 @@
 # Multi-stage Docker build for Themis Legal Metrology Compliance Engine
 # Stage 1: Build binary with cached Rust dependencies
-FROM rust:1.80-slim-bookworm AS builder
+FROM rust:slim-bookworm AS builder
 
 WORKDIR /usr/src/themis
 
@@ -45,8 +45,11 @@ RUN useradd -u 10001 -m themisuser
 # Copy stripped binary from builder
 COPY --from=builder /usr/src/themis/target/release/themis /app/themis
 
-# Create models and storage directories
-RUN mkdir -p /app/models /app/data && chown -R themisuser:themisuser /app
+# Copy ONNX OCR models
+COPY themis/models /app/models
+
+# Create storage directories and set permissions
+RUN mkdir -p /app/data && chown -R themisuser:themisuser /app
 
 # Default models volume mount
 VOLUME ["/app/models", "/app/data"]
