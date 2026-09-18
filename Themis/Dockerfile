@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY themis/Cargo.toml themis/Cargo.lock ./
 
 # Create dummy src to cache dependencies
-RUN mkdir src && echo "fn main() {}" > src/main.rs && \
+RUN mkdir src && touch src/lib.rs && echo "fn main() {}" > src/main.rs && \
     cargo build --release && \
     rm -rf src
 
